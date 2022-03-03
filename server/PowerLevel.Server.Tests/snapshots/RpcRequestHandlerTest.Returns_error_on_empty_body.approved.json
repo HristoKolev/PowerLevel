@@ -1,0 +1,7 @@
+﻿{
+  "payload": null,
+  "isOk": false,
+  "errorMessages": [
+    "The HTTP request has an empty body."
+  ]
+}

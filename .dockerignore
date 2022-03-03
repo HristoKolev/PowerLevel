@@ -1,0 +1,7 @@
+**/bin/
+**/obj/
+**/.idea/
+**/*.user
+**/logs/
+**/node_modules/
+**/BenchmarkDotNet.Artifacts/

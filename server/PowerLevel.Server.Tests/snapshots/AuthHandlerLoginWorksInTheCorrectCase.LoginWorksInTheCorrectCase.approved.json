@@ -1,0 +1,9 @@
+﻿{
+  "ErrorMessages": null,
+  "IsOk": true,
+  "Payload": {
+    "CsrfToken": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "EmailAddress": "test@abc.de",
+    "UserProfileID": 1
+  }
+}
