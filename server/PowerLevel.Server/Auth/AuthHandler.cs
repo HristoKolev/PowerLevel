@@ -98,7 +98,7 @@ public class AuthHandler
 
         await using (var tx = await this.db.BeginTransaction())
         {
-            var session = await this.authService.CreateSession(login.LoginID, profile.UserProfileID, req.RememberMe);
+            var session = await this.authService.CreateSession(login.LoginID, profile!.UserProfileID, req.RememberMe);
 
             var result = new Result<LoginResponse>
             {
