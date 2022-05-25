@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind utilities;
+
+body {
+  --color-background: green;
+  --color-text-inverse: white;
+  --custom-drawer-width: 240px;
+}

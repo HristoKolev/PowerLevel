@@ -1,0 +1,12 @@
+{
+  "name": "PowerLevel",
+  "short_name": "PowerLevel",
+  "description": "PowerLevel",
+  "dir": "auto",
+  "lang": "en-US",
+  "display": "fullscreen",
+  "orientation": "any",
+  "start_url": "/",
+  "background_color": "red",
+  "theme_color": "blue"
+}
