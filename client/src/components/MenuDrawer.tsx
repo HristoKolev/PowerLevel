@@ -14,7 +14,10 @@ import MailIcon from '@mui/icons-material/Mail';
 import { css } from '@linaria/core';
 
 import { useAppDispatch, useAppSelector } from '~infrastructure/redux-store';
-import { actions, selectors } from '~components/menuDrawerSlice';
+import {
+  menuDrawerActions,
+  menuDrawerSelector,
+} from '~components/menuDrawerSlice';
 
 const customDrawerClassName = css`
   width: var(--custom-drawer-width);
@@ -36,10 +39,10 @@ const customDrawerClassName = css`
 export const MenuDrawer = memo((): JSX.Element => {
   const dispatch = useAppDispatch();
 
-  const { open } = useAppSelector(selectors.menuDrawerSelector);
+  const { open } = useAppSelector(menuDrawerSelector);
 
   const handleOnIconClick = useCallback(() => {
-    dispatch(actions.toggleDrawer());
+    dispatch(menuDrawerActions.toggleDrawer());
   }, [dispatch]);
 
   return (

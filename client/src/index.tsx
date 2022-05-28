@@ -9,7 +9,7 @@ import './styles.css';
 import { createStore } from '~infrastructure/redux-store';
 import { App } from '~components/App';
 import { createDrawerResizeObserver } from '~infrastructure/createDrawerResizeObserver';
-import { actions } from '~components/menuDrawerSlice';
+import { menuDrawerActions } from '~components/menuDrawerSlice';
 
 if (window.__browserSupported) {
   if ('serviceWorker' in navigator) {
@@ -21,7 +21,7 @@ if (window.__browserSupported) {
   const root = document.getElementById('root') as Element;
 
   createDrawerResizeObserver(root, (breakpoint) => {
-    store.dispatch(actions.changeDrawerBreakpoint({ breakpoint }));
+    store.dispatch(menuDrawerActions.changeDrawerBreakpoint({ breakpoint }));
   });
 
   createRoot(root).render(<App store={store} />);

@@ -3,8 +3,8 @@ import { css } from '@linaria/core';
 
 import { useAppSelector } from '~infrastructure/redux-store';
 import {
+  menuDrawerSelector,
   ResponsiveDrawerBreakpoint,
-  selectors,
 } from '~components/menuDrawerSlice';
 
 const mainContentClassName = css`
@@ -32,7 +32,7 @@ interface MainContentProps {
 
 export const MainContent = memo(
   ({ children }: MainContentProps): JSX.Element => {
-    const { open, breakpoint } = useAppSelector(selectors.menuDrawerSelector);
+    const { open, breakpoint } = useAppSelector(menuDrawerSelector);
     return (
       <main
         className={`flex-grow p-3 ${mainContentClassName} ${

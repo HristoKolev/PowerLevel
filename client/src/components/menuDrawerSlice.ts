@@ -38,11 +38,8 @@ export const menuDrawerSlice = createSlice({
   },
 });
 
-const menuDrawerSelector: Selector<RootState, MenuDrawerState> = (state) =>
-  state[menuDrawerSlice.name];
+export const menuDrawerSelector: Selector<RootState, MenuDrawerState> = (
+  state
+) => state[menuDrawerSlice.name];
 
-export const selectors = {
-  menuDrawerSelector,
-};
-
-export const actions = menuDrawerSlice.actions;
+export const menuDrawerActions = menuDrawerSlice.actions;

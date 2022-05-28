@@ -4,9 +4,9 @@ import { IconButton, Toolbar, AppBar, Button } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 
 import {
-  actions,
+  menuDrawerActions,
+  menuDrawerSelector,
   ResponsiveDrawerBreakpoint,
-  selectors,
 } from '~components/menuDrawerSlice';
 import { useAppDispatch, useAppSelector } from '~infrastructure/redux-store';
 
@@ -33,10 +33,10 @@ const customAppBarClassName = css`
 export const CustomAppBar = memo((): JSX.Element => {
   const dispatch = useAppDispatch();
 
-  const { open, breakpoint } = useAppSelector(selectors.menuDrawerSelector);
+  const { open, breakpoint } = useAppSelector(menuDrawerSelector);
 
   const handleOnIconClick = useCallback(() => {
-    dispatch(actions.toggleDrawer());
+    dispatch(menuDrawerActions.toggleDrawer());
   }, [dispatch]);
 
   return (

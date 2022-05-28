@@ -17,9 +17,7 @@ export const globalSlice = createSlice({
   reducers: {},
 });
 
-const globalSelector: Selector<RootState, GlobalState> = (state) =>
+export const globalSelector: Selector<RootState, GlobalState> = (state) =>
   state[globalSlice.name];
 
-export const selectors = {
-  globalSelector,
-};
+export const globalActions = globalSlice.actions;
