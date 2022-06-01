@@ -72,6 +72,7 @@
     "fork-ts-checker-webpack-plugin": "^7",
     "html-loader": "^3",
     "html-webpack-plugin": "^5",
+    "http-proxy-middleware": "^2",
     "jest": "^28",
     "mini-css-extract-plugin": "^2",
     "postcss": "^8",

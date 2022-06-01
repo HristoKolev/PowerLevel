@@ -1,4 +1,5 @@
 const historyApiFallback = require('connect-history-api-fallback');
+const httpProxyMiddleware = require('http-proxy-middleware');
 
 module.exports = {
   ui: {
@@ -15,7 +16,12 @@ module.exports = {
   server: 'dist',
   proxy: false,
   port: 3000,
-  middleware: [historyApiFallback()],
+  middleware: [
+    historyApiFallback(),
+    httpProxyMiddleware.createProxyMiddleware('/rpc', {
+      target: 'http://localhost:5000/rpc',
+    })
+  ],
   serveStatic: [],
   ghostMode: false,
   logLevel: 'info',
