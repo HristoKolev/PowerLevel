@@ -1,4 +1,4 @@
-import { ResponsiveDrawerBreakpoint } from '~components/menuDrawerSlice';
+import { ResponsiveDrawerBreakpoint } from '~layout/menuDrawerSlice';
 
 export const createDrawerResizeObserver = (
   element: Element,

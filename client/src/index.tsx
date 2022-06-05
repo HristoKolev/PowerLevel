@@ -8,8 +8,8 @@ import './styles.css';
 
 import { createStore } from '~infrastructure/redux-store';
 import { App } from '~components/App';
-import { createDrawerResizeObserver } from '~infrastructure/createDrawerResizeObserver';
-import { menuDrawerActions } from '~components/menuDrawerSlice';
+import { createDrawerResizeObserver } from '~layout/createDrawerResizeObserver';
+import { menuDrawerActions } from '~layout/menuDrawerSlice';
 
 if (window.__browserSupported) {
   if ('serviceWorker' in navigator) {

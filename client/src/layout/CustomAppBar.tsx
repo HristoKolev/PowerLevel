@@ -7,7 +7,7 @@ import {
   menuDrawerActions,
   menuDrawerSelector,
   ResponsiveDrawerBreakpoint,
-} from '~components/menuDrawerSlice';
+} from '~layout/menuDrawerSlice';
 import { useAppDispatch, useAppSelector } from '~infrastructure/redux-store';
 
 const customAppBarClassName = css`

@@ -3,13 +3,13 @@ import { CssBaseline } from '@mui/material';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 
-import { CustomAppBar } from '~components/CustomAppBar';
-import { MainContent } from '~components/MainContent';
-import { MenuDrawer } from '~components/MenuDrawer';
+import { CustomAppBar } from '~layout/CustomAppBar';
+import { MainContent } from '~layout/MainContent';
+import { MenuDrawer } from '~layout/MenuDrawer';
 import { Home } from '~components/Home';
-import { Work } from '~components/Work';
 import { NotFound } from '~components/NotFound';
 import { StoreType } from '~infrastructure/redux-store';
+import { LoginPage } from '~components/LoginPage';
 
 interface AppProps {
   store: StoreType;
@@ -25,7 +25,7 @@ export const App = memo(({ store }: AppProps) => (
         <MainContent>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="work" element={<Work />} />
+            <Route path="login" element={<LoginPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </MainContent>

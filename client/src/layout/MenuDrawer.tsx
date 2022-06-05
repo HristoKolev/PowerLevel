@@ -14,10 +14,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import { css } from '@linaria/core';
 
 import { useAppDispatch, useAppSelector } from '~infrastructure/redux-store';
-import {
-  menuDrawerActions,
-  menuDrawerSelector,
-} from '~components/menuDrawerSlice';
+import { menuDrawerActions, menuDrawerSelector } from '~layout/menuDrawerSlice';
 
 const customDrawerClassName = css`
   width: var(--custom-drawer-width);

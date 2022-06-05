@@ -2,7 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
 import { globalSlice } from '~components/globalSlice';
-import { menuDrawerSlice } from '~components/menuDrawerSlice';
+import { menuDrawerSlice } from '~layout/menuDrawerSlice';
 
 export const createStore = () =>
   configureStore({

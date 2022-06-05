@@ -5,7 +5,7 @@ import { useAppSelector } from '~infrastructure/redux-store';
 import {
   menuDrawerSelector,
   ResponsiveDrawerBreakpoint,
-} from '~components/menuDrawerSlice';
+} from '~layout/menuDrawerSlice';
 
 const mainContentClassName = css`
   transition: margin 190ms cubic-bezier(0.4, 0, 0.6, 1) 0ms;
