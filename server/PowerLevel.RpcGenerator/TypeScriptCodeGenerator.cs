@@ -9,44 +9,29 @@ using Xdxd.DotNet.Rpc;
 
 public static class TypeScriptCodeGenerator
 {
+    private static readonly List<string> ImportStatements = new()
+    {
+        "import { RpcClientHelper } from '~infrastructure/RpcClientHelper';",
+        "import { Result } from '~infrastructure/helpers';",
+    };
+
     public static string Generate(List<RpcRequestMetadata> metadata)
     {
         var types = metadata.Select(x => x.RequestType)
             .Concat(metadata.Select(x => x.ResponseType))
             .ToList();
 
-        var allTypes = GetAllTypes(types);
-
-        string dtoContents = string.Join("\n\n", allTypes.Select(ScriptType).Where(x => x != null));
-
+        string importContents = string.Join("\n", ImportStatements);
         string rpcClientContents = BuildServerApiClient(metadata);
+        string dtoContents = string.Join("\n\n", ResolveNestedDtoTypes(types).Select(GetTypeScriptDefinition).Where(x => x != null));
 
-        string contents = "import { RpcClientHelper } from '~infrastructure/RpcClientHelper';\n" +
-                          "import { Result } from '~infrastructure/helpers';\n\n"
-                          + dtoContents + "\n" + rpcClientContents;
-
-        return contents;
+        return importContents + "\n\n" + dtoContents + "\n" + rpcClientContents;
     }
 
-    private static string ScriptType(Type targetType)
-    {
-        var props = targetType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-        var scriptedProperties = props.Select(x =>
-        {
-            bool isNullableType = x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
-            return $"  {CamelCase(x.Name)}{(isNullableType ? "?" : "")}: {ResolveType(x.PropertyType)};";
-        }).ToList();
-
-        if (scriptedProperties.Count == 0)
-        {
-            return null;
-        }
-
-        return $"export interface {targetType.Name} {{\n" + string.Join("\n", scriptedProperties) + "\n}";
-    }
-
-    private static string ResolveType(Type type)
+    /// <summary>
+    /// Returns a TypeScript type name for a given CLR type.
+    /// </summary>
+    private static string GetTypeScriptTypeName(Type type)
     {
         var typeMap = new Dictionary<Type, string>
         {
@@ -72,7 +57,7 @@ public static class TypeScriptCodeGenerator
 
             var t = type.GetElementType();
 
-            return ResolveType(t) + "[]";
+            return GetTypeScriptTypeName(t) + "[]";
         }
 
         if (type.IsGenericType)
@@ -84,7 +69,7 @@ public static class TypeScriptCodeGenerator
                 var genericArguments = type.GetGenericArguments();
                 var t = genericArguments[0];
 
-                return ResolveType(t) + "[]";
+                return GetTypeScriptTypeName(t) + "[]";
             }
 
             if (genericDefinition == typeof(Dictionary<,>))
@@ -94,7 +79,7 @@ public static class TypeScriptCodeGenerator
                 var tKey = genericArguments[0];
                 var tValue = genericArguments[1];
 
-                return "{ [key: " + ResolveType(tKey) + "]: " + ResolveType(tValue) + " }";
+                return "{ [key: " + GetTypeScriptTypeName(tKey) + "]: " + GetTypeScriptTypeName(tValue) + " }";
             }
 
             if (genericDefinition == typeof(Nullable<>))
@@ -103,7 +88,7 @@ public static class TypeScriptCodeGenerator
 
                 var tKey = genericArguments[0];
 
-                return ResolveType(tKey);
+                return GetTypeScriptTypeName(tKey);
             }
 
             throw new Exception($"Generic type not supported: {genericDefinition.Name}");
@@ -112,7 +97,31 @@ public static class TypeScriptCodeGenerator
         return type.Name;
     }
 
-    private static List<Type> GetAllTypes(List<Type> types)
+    /// <summary>
+    /// Returns a TypeScript type definition for a given CLR type.
+    /// </summary>
+    private static string GetTypeScriptDefinition(Type targetType)
+    {
+        var props = targetType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+        var scriptedProperties = props.Select(x =>
+        {
+            bool isNullableType = x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
+            return $"  {JsonNamingPolicy.CamelCase.ConvertName(x.Name)}{(isNullableType ? "?" : "")}: {GetTypeScriptTypeName(x.PropertyType)};";
+        }).ToList();
+
+        if (scriptedProperties.Count == 0)
+        {
+            return null;
+        }
+
+        return $"export interface {targetType.Name} {{\n" + string.Join("\n", scriptedProperties) + "\n}";
+    }
+
+    /// <summary>
+    /// Returns a list of nested CLR types for a given list of CLR types. The result includes the input list.
+    /// </summary>
+    private static List<Type> ResolveNestedDtoTypes(List<Type> types)
     {
         var bannedTypes = new[]
         {
@@ -207,6 +216,9 @@ public static class TypeScriptCodeGenerator
         return allTypes.ToList();
     }
 
+    /// <summary>
+    /// Builds the RpcClient TypeScript type that contains a function for every request.
+    /// </summary>
     private static string BuildServerApiClient(List<RpcRequestMetadata> metadata)
     {
         string GetMethodName(Type reqType)
@@ -215,14 +227,14 @@ public static class TypeScriptCodeGenerator
             return name[0].ToString().ToLower() + name.Substring(1);
         }
 
-        string GetResponseType(Type responseType)
-        {
-            return responseType == null || ScriptType(responseType) == null ? "Result" : $"Result<{responseType.Name}>";
-        }
-
         string GetRequestType(Type requestType)
         {
-            return requestType == null || ScriptType(requestType) == null ? null : requestType.Name;
+            return requestType == null || GetTypeScriptDefinition(requestType) == null ? null : requestType.Name;
+        }
+
+        string GetResponseType(Type responseType)
+        {
+            return responseType == null || GetTypeScriptDefinition(responseType) == null ? "Result" : $"Result<{responseType.Name}>";
         }
 
         string functions = string.Join("\n", metadata.Select((x, index) =>
@@ -259,10 +271,5 @@ export class RpcClient {{
 {functions}
 }}
 ";
-    }
-
-    private static string CamelCase(string input)
-    {
-        return JsonNamingPolicy.CamelCase.ConvertName(input);
     }
 }

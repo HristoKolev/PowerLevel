@@ -166,7 +166,7 @@ module.exports = {
       '@mui/material': '@mui/material/modern',
       '@mui/styled-engine': '@mui/styled-engine/modern',
       '@mui/system': '@mui/system/modern',
-    }
+    },
   },
   stats: {
     errorDetails: true,

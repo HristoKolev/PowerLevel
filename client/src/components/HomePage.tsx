@@ -1,10 +1,10 @@
 import { Fragment, memo } from 'react';
 import { Alert, AlertTitle, Button } from '@mui/material';
 
-export const Home = memo(
+export const HomePage = memo(
   (): JSX.Element => (
     <div>
-      {Array(100)
+      {Array(5)
         .fill(undefined)
         .map((_, i) => (
           <Fragment key={i}>

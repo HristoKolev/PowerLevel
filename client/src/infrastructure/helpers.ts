@@ -1,5 +1,5 @@
 export type Result<T = null> =
-  | { payload: T; isOk: true }
+  | { isOk: true; payload: T }
   | { isOk: false; errorMessages: string[] };
 
 export interface SelectItem<T = unknown> {

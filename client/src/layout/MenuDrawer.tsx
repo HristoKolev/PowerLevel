@@ -50,7 +50,7 @@ export const MenuDrawer = memo((): JSX.Element => {
       open={open}
     >
       <div className={`flex items-center justify-between py-1 drawer-header`}>
-        <div className="flex-auto text-center font-bold">Menu</div>
+        <div className="flex-auto text-center font-bold select-none">Menu</div>
         <IconButton onClick={handleOnIconClick}>
           <ChevronLeftIcon />
         </IconButton>

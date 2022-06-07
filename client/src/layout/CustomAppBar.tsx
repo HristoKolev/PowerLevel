@@ -2,6 +2,7 @@ import { memo, useCallback } from 'react';
 import { css } from '@linaria/core';
 import { IconButton, Toolbar, AppBar, Button } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import { Link } from 'react-router-dom';
 
 import {
   menuDrawerActions,
@@ -59,9 +60,15 @@ export const CustomAppBar = memo((): JSX.Element => {
           <MenuIcon />
         </IconButton>
 
-        <div className="font-medium ml-3 brand-name flex-grow">Power Level</div>
+        <div className="font-medium ml-3 brand-name flex-grow">
+          <Link to="/" className="link">
+            Power Level
+          </Link>
+        </div>
 
-        <Button color="inherit">Login</Button>
+        <Link to="/login" className="link">
+          <Button color="inherit">Login</Button>
+        </Link>
       </Toolbar>
     </AppBar>
   );
