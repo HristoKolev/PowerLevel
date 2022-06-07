@@ -1,3 +1,6 @@
+# Favicons (again)
+* Static generation for the icons in a separate script.
+
 # Application
 
 ## Error handling
