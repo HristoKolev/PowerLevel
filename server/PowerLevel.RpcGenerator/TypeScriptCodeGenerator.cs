@@ -5,27 +5,63 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
+using System.Threading.Tasks;
+using Server.Infrastructure;
 using Xdxd.DotNet.Rpc;
+using Xdxd.DotNet.Shared;
 
 public static class TypeScriptCodeGenerator
 {
     private static readonly List<string> ImportStatements = new()
     {
+        "// eslint-disable-next-line eslint-comments/disable-enable-pair",
+        "/* eslint-disable prettier/prettier */",
         "import { RpcClientHelper } from '~infrastructure/RpcClientHelper';",
-        "import { Result } from '~infrastructure/helpers';",
     };
 
     public static string Generate(List<RpcRequestMetadata> metadata)
     {
         var types = metadata.Select(x => x.RequestType)
             .Concat(metadata.Select(x => x.ResponseType))
+            .Concat(metadata.Select(x => GetResultErrorType(x.HandlerMethod.ReturnType)))
+            .Where(x => x != null)
             .ToList();
 
         string importContents = string.Join("\n", ImportStatements);
-        string rpcClientContents = BuildServerApiClient(metadata);
         string dtoContents = string.Join("\n\n", ResolveNestedDtoTypes(types).Select(GetTypeScriptDefinition).Where(x => x != null));
 
-        return importContents + "\n\n" + dtoContents + "\n" + rpcClientContents;
+        string resultTypeDefinition = @"
+export type ApiResult<TPayload = null, TError extends DefaultApiError = DefaultApiError> =
+  { isOk: true; payload: TPayload } | { isOk: false; error: TError };";
+
+        string rpcClientContents = BuildServerApiClient(metadata);
+
+        return importContents + "\n\n" + dtoContents + "\n" + resultTypeDefinition + "\n" + rpcClientContents;
+    }
+
+    private static Type GetResultErrorType(Type methodReturnType)
+    {
+        if (methodReturnType.IsGenericType && methodReturnType.GetGenericTypeDefinition() == typeof(Task<>))
+        {
+            methodReturnType = methodReturnType.GenericTypeArguments.First();
+        }
+
+        Type GetPayloadType(Type possibleResultType)
+        {
+            if (possibleResultType == null)
+            {
+                return null;
+            }
+
+            if (possibleResultType.IsGenericType && possibleResultType.GetGenericTypeDefinition() == typeof(Result<,>))
+            {
+                return possibleResultType.GenericTypeArguments[1];
+            }
+
+            return GetPayloadType(possibleResultType.BaseType);
+        }
+
+        return GetPayloadType(methodReturnType);
     }
 
     /// <summary>
@@ -104,16 +140,17 @@ public static class TypeScriptCodeGenerator
     {
         var props = targetType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-        var scriptedProperties = props.Select(x =>
-        {
-            bool isNullableType = x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
-            return $"  {JsonNamingPolicy.CamelCase.ConvertName(x.Name)}{(isNullableType ? "?" : "")}: {GetTypeScriptTypeName(x.PropertyType)};";
-        }).ToList();
-
-        if (scriptedProperties.Count == 0)
+        if (props.Length == 0)
         {
             return null;
         }
+
+        var scriptedProperties = props.Select(x =>
+        {
+            bool isNullableType = (x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>)) ||
+                                  x.GetCustomAttribute<RpcNullableAttribute>() != null;
+            return $"  {JsonNamingPolicy.CamelCase.ConvertName(x.Name)}{(isNullableType ? "?" : "")}: {GetTypeScriptTypeName(x.PropertyType)};";
+        }).ToList();
 
         return $"export interface {targetType.Name} {{\n" + string.Join("\n", scriptedProperties) + "\n}";
     }
@@ -219,40 +256,46 @@ public static class TypeScriptCodeGenerator
     /// <summary>
     /// Builds the RpcClient TypeScript type that contains a function for every request.
     /// </summary>
-    private static string BuildServerApiClient(List<RpcRequestMetadata> metadata)
+    private static string BuildServerApiClient(List<RpcRequestMetadata> metadataList)
     {
-        string GetMethodName(Type reqType)
+        string GetMethodName(RpcRequestMetadata metadata)
         {
-            string name = reqType.Name.Substring(0, reqType.Name.Length - "Request".Length);
-            return name[0].ToString().ToLower() + name.Substring(1);
+            string name = metadata.RequestType.Name[..^"Request".Length];
+            return name[0].ToString().ToLower() + name[1..];
         }
 
-        string GetRequestType(Type requestType)
+        string GetRequestType(RpcRequestMetadata metadata)
         {
-            return requestType == null || GetTypeScriptDefinition(requestType) == null ? null : requestType.Name;
+            return metadata.RequestType == null || GetTypeScriptDefinition(metadata.RequestType) == null ? null : metadata.RequestType.Name;
         }
 
-        string GetResponseType(Type responseType)
+        string GetResponseType(RpcRequestMetadata metadata)
         {
-            return responseType == null || GetTypeScriptDefinition(responseType) == null ? "Result" : $"Result<{responseType.Name}>";
+            var errorType = GetResultErrorType(metadata.HandlerMethod.ReturnType);
+
+            string errorTypeArgument = errorType != null && errorType.Name != nameof(DefaultApiError) ? $", {errorType.Name}" : "";
+
+            return metadata.ResponseType == null || GetTypeScriptDefinition(metadata.ResponseType) == null
+                ? "ApiResult"
+                : $"ApiResult<{metadata.ResponseType.Name}{errorTypeArgument}>";
         }
 
-        string functions = string.Join("\n", metadata.Select((x, index) =>
+        string functions = string.Join("\n", metadataList.Select((metadata, index) =>
         {
             var requestArgument = "";
             var requestParameter = "";
-            string requestType = GetRequestType(x.RequestType);
+            string requestType = GetRequestType(metadata);
             if (requestType != null)
             {
                 requestArgument = $"request: {requestType}";
                 requestParameter = ", request";
             }
 
-            string result = $"  {GetMethodName(x.RequestType)}({requestArgument}): Promise<{GetResponseType(x.ResponseType)}> {{\n";
-            result += $"    return this.helper.send('{x.RequestType.Name}'{requestParameter});\n";
+            string result = $"  {GetMethodName(metadata)}({requestArgument}): Promise<{GetResponseType(metadata)}> {{\n";
+            result += $"    return this.helper.send('{metadata.RequestType.Name}'{requestParameter});\n";
             result += "  }";
 
-            if (index != metadata.Count - 1)
+            if (index != metadataList.Count - 1)
             {
                 result += "\n";
             }
@@ -262,7 +305,7 @@ public static class TypeScriptCodeGenerator
 
         return @$"
 export class RpcClient {{
-  helper: RpcClientHelper;
+  private helper: RpcClientHelper;
 
   constructor(helper: RpcClientHelper) {{
     this.helper = helper;

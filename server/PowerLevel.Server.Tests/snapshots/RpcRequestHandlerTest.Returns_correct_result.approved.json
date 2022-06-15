@@ -1,7 +1,7 @@
 ﻿{
+  "isOk": true,
+  "error": null,
   "payload": {
     "num": 34
-  },
-  "isOk": true,
-  "errorMessages": null
+  }
 }

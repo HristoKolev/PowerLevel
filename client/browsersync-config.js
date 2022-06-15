@@ -20,6 +20,7 @@ module.exports = {
     historyApiFallback(),
     httpProxyMiddleware.createProxyMiddleware('/rpc', {
       target: 'http://localhost:5000/rpc',
+      prependPath: false,
     }),
   ],
   serveStatic: [],

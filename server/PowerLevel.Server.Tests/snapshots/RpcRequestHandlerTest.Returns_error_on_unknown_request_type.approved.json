@@ -1,7 +1,10 @@
 ﻿{
-  "payload": null,
   "isOk": false,
-  "errorMessages": [
-    "No RPC handler for request. RequestType: NotRegisteredRequest."
-  ]
+  "error": {
+    "errorMessages": [
+      "No RPC handler for request. RequestType: NotRegisteredRequest."
+    ],
+    "errorID": null
+  },
+  "payload": null
 }

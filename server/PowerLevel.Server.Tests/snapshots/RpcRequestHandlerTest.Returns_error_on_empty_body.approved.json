@@ -1,7 +1,10 @@
 ﻿{
-  "payload": null,
   "isOk": false,
-  "errorMessages": [
-    "The HTTP request has an empty body."
-  ]
+  "error": {
+    "errorMessages": [
+      "The HTTP request has an empty body."
+    ],
+    "errorID": null
+  },
+  "payload": null
 }

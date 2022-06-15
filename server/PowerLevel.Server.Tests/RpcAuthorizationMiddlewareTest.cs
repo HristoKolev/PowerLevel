@@ -242,10 +242,10 @@ public class RpcAuthorizationMiddlewareTest
     }
 
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-    private static void AssertUnauthorizedAccess(Result result)
+    private static void AssertUnauthorizedAccess(Result<object, object> result)
     {
         Assert.False(result.IsOk);
-        Assert.Equal(RpcAuthorizationMiddleware.UNAUTHORIZED_ACCESS_MESSAGE, result.ErrorMessages.Single());
+        Assert.Equal(RpcAuthorizationMiddleware.UNAUTHORIZED_ACCESS_MESSAGE, (result.Error as ApiError)!.ErrorMessages.Single());
     }
 
     private static InstanceProvider GetInstanceProvider(HttpRequestState httpRequestState)

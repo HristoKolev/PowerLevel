@@ -354,6 +354,19 @@ public class QuizPoco : IPoco<QuizPoco>
 public class UserLoginPoco : IPoco<UserLoginPoco>
 {
     /// <summary>
+    /// <para>Column name: 'email_address'.</para>
+    /// <para>Table name: 'user_logins'.</para>
+    /// <para>This column is not nullable.</para>
+    /// <para>PostgreSQL data type: 'text'.</para>
+    /// <para>NpgsqlDbType: 'NpgsqlDbType.Text'.</para>
+    /// <para>CLR type: 'string'.</para>
+    /// <para>linq2db data type: 'DataType.Text'.</para>
+    /// </summary>
+    [LinqToDB.Mapping.NotNull]
+    [Column(Name = "email_address", DataType = DataType.Text)]
+    public string EmailAddress { get; set; }
+
+    /// <summary>
     /// <para>Column name: 'enabled'.</para>
     /// <para>Table name: 'user_logins'.</para>
     /// <para>This column is not nullable.</para>
@@ -411,19 +424,6 @@ public class UserLoginPoco : IPoco<UserLoginPoco>
     public int UserProfileID { get; set; }
 
     /// <summary>
-    /// <para>Column name: 'username'.</para>
-    /// <para>Table name: 'user_logins'.</para>
-    /// <para>This column is not nullable.</para>
-    /// <para>PostgreSQL data type: 'text'.</para>
-    /// <para>NpgsqlDbType: 'NpgsqlDbType.Text'.</para>
-    /// <para>CLR type: 'string'.</para>
-    /// <para>linq2db data type: 'DataType.Text'.</para>
-    /// </summary>
-    [LinqToDB.Mapping.NotNull]
-    [Column(Name = "username", DataType = DataType.Text)]
-    public string Username { get; set; }
-
-    /// <summary>
     /// <para>Column name: 'verification_code'.</para>
     /// <para>Table name: 'user_logins'.</para>
     /// <para>This column is nullable.</para>
@@ -454,6 +454,11 @@ public class UserLoginPoco : IPoco<UserLoginPoco>
         // ReSharper disable once RedundantExplicitArrayCreation
         return new NpgsqlParameter[]
         {
+            new NpgsqlParameter<string>
+            {
+                TypedValue = this.EmailAddress,
+                NpgsqlDbType = NpgsqlDbType.Text,
+            },
             new NpgsqlParameter<bool>
             {
                 TypedValue = this.Enabled,
@@ -468,11 +473,6 @@ public class UserLoginPoco : IPoco<UserLoginPoco>
             {
                 TypedValue = this.UserProfileID,
                 NpgsqlDbType = NpgsqlDbType.Integer,
-            },
-            new NpgsqlParameter<string>
-            {
-                TypedValue = this.Username,
-                NpgsqlDbType = NpgsqlDbType.Text,
             },
             new NpgsqlParameter<string>
             {
@@ -504,6 +504,15 @@ public class UserLoginPoco : IPoco<UserLoginPoco>
 
     public async Task WriteToImporter(NpgsqlBinaryImporter importer)
     {
+        if (this.EmailAddress == null)
+        {
+            await importer.WriteNullAsync();
+        }
+        else
+        {
+            await importer.WriteAsync(this.EmailAddress, NpgsqlDbType.Text);
+        }
+
         await importer.WriteAsync(this.Enabled, NpgsqlDbType.Boolean);
 
         if (this.PasswordHash == null)
@@ -516,15 +525,6 @@ public class UserLoginPoco : IPoco<UserLoginPoco>
         }
 
         await importer.WriteAsync(this.UserProfileID, NpgsqlDbType.Integer);
-
-        if (this.Username == null)
-        {
-            await importer.WriteNullAsync();
-        }
-        else
-        {
-            await importer.WriteAsync(this.Username, NpgsqlDbType.Text);
-        }
 
         if (this.VerificationCode == null)
         {
@@ -1295,6 +1295,42 @@ public class DbMetadata
                 {
                     ColumnComment = "" == string.Empty ? null : "",
                     Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
+                    ColumnName = "email_address",
+                    DbDataType = "text",
+                    IsNullable = bool.Parse("False"),
+                    IsPrimaryKey = bool.Parse("False"),
+                    PrimaryKeyConstraintName = "" == string.Empty ? null : "",
+                    IsForeignKey = bool.Parse("False"),
+                    ForeignKeyConstraintName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceColumnName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceSchemaName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceTableName = "" == string.Empty ? null : "",
+                    PropertyName = "EmailAddress",
+                    TableName = "user_logins",
+                    TableSchema = "public",
+                    PropertyType = new SimpleType
+                    {
+                        ClrTypeName = "string",
+                        ClrType = typeof(string),
+                        ClrNonNullableTypeName = "string",
+                        ClrNonNullableType = typeof(string),
+                        ClrNullableTypeName = "string",
+                        ClrNullableType = typeof(string),
+                        DbDataType = "text",
+                        IsNullable = bool.Parse("False"),
+                        IsClrValueType = bool.Parse("False"),
+                        IsClrNullableType = bool.Parse("False"),
+                        IsClrReferenceType = bool.Parse("True"),
+                        Linq2DbDataTypeName = "DataType.Text",
+                        Linq2DbDataType = DataType.Text,
+                        NpgsqlDbTypeName = "NpgsqlDbType.Text",
+                        NpgsqlDbType = NpgsqlDbType.Text,
+                    },
+                },
+                new ColumnMetadataModel
+                {
+                    ColumnComment = "" == string.Empty ? null : "",
+                    Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
                     ColumnName = "enabled",
                     DbDataType = "boolean",
                     IsNullable = bool.Parse("False"),
@@ -1439,42 +1475,6 @@ public class DbMetadata
                 {
                     ColumnComment = "" == string.Empty ? null : "",
                     Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
-                    ColumnName = "username",
-                    DbDataType = "text",
-                    IsNullable = bool.Parse("False"),
-                    IsPrimaryKey = bool.Parse("False"),
-                    PrimaryKeyConstraintName = "" == string.Empty ? null : "",
-                    IsForeignKey = bool.Parse("False"),
-                    ForeignKeyConstraintName = "" == string.Empty ? null : "",
-                    ForeignKeyReferenceColumnName = "" == string.Empty ? null : "",
-                    ForeignKeyReferenceSchemaName = "" == string.Empty ? null : "",
-                    ForeignKeyReferenceTableName = "" == string.Empty ? null : "",
-                    PropertyName = "Username",
-                    TableName = "user_logins",
-                    TableSchema = "public",
-                    PropertyType = new SimpleType
-                    {
-                        ClrTypeName = "string",
-                        ClrType = typeof(string),
-                        ClrNonNullableTypeName = "string",
-                        ClrNonNullableType = typeof(string),
-                        ClrNullableTypeName = "string",
-                        ClrNullableType = typeof(string),
-                        DbDataType = "text",
-                        IsNullable = bool.Parse("False"),
-                        IsClrValueType = bool.Parse("False"),
-                        IsClrNullableType = bool.Parse("False"),
-                        IsClrReferenceType = bool.Parse("True"),
-                        Linq2DbDataTypeName = "DataType.Text",
-                        Linq2DbDataType = DataType.Text,
-                        NpgsqlDbTypeName = "NpgsqlDbType.Text",
-                        NpgsqlDbType = NpgsqlDbType.Text,
-                    },
-                },
-                new ColumnMetadataModel
-                {
-                    ColumnComment = "" == string.Empty ? null : "",
-                    Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
                     ColumnName = "verification_code",
                     DbDataType = "text",
                     IsNullable = bool.Parse("True"),
@@ -1546,10 +1546,10 @@ public class DbMetadata
             },
             NonPkColumnNames = new[]
             {
+                "email_address",
                 "enabled",
                 "password_hash",
                 "user_profile_id",
-                "username",
                 "verification_code",
                 "verified",
             },

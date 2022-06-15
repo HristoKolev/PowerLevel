@@ -1,7 +1,10 @@
 ﻿{
-  "ErrorMessages": [
-    "There already is an account with that email address."
-  ],
+  "Error": {
+    "ErrorID": null,
+    "ErrorMessages": [
+      "There already is an account with that email address."
+    ]
+  },
   "IsOk": false,
   "Payload": null
 }

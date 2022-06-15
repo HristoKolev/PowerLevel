@@ -27,18 +27,18 @@ describe('RpcClientHelper.send', () => {
 
   test('returns error result on falsy requestType', async () => {
     const helper = new RpcClientHelper();
-    for (const requestType of ['', null, undefined, 0, NaN]) {
-      const result = await helper.send(requestType as string);
-      expect(result).toMatchInlineSnapshot(`
-              Object {
-                "errorMessages": Array [
-                  "Rpc client error: requestType is falsy.",
-                ],
-                "isOk": false,
-              }
-          `);
-      expect(consoleErrorMock).toHaveBeenCalled();
-    }
+    const result = await helper.send(null as unknown as string);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "error": Object {
+          "errorMessages": Array [
+            "Rpc client error: requestType is falsy.",
+          ],
+        },
+        "isOk": false,
+      }
+    `);
+    expect(consoleErrorMock).toHaveBeenCalled();
   });
 
   test('returns error result on serialization error', async () => {
@@ -51,9 +51,11 @@ describe('RpcClientHelper.send', () => {
 
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "errorMessages": Array [
-          "Rpc client error: failed to serialize request body.",
-        ],
+        "error": Object {
+          "errorMessages": Array [
+            "Rpc client error: failed to serialize request body.",
+          ],
+        },
         "isOk": false,
       }
     `);
@@ -71,9 +73,11 @@ describe('RpcClientHelper.send', () => {
 
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "errorMessages": Array [
-          "Network error.",
-        ],
+        "error": Object {
+          "errorMessages": Array [
+            "Network error.",
+          ],
+        },
         "isOk": false,
       }
     `);
@@ -89,9 +93,11 @@ describe('RpcClientHelper.send', () => {
 
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "errorMessages": Array [
-          "An error occurred on the server.",
-        ],
+        "error": Object {
+          "errorMessages": Array [
+            "An error occurred on the server.",
+          ],
+        },
         "isOk": false,
       }
     `);
@@ -112,9 +118,11 @@ describe('RpcClientHelper.send', () => {
 
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "errorMessages": Array [
-          "Rpc client error: failed to read response body.",
-        ],
+        "error": Object {
+          "errorMessages": Array [
+            "Rpc client error: failed to read response body.",
+          ],
+        },
         "isOk": false,
       }
     `);
@@ -139,9 +147,11 @@ describe('RpcClientHelper.send', () => {
 
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "errorMessages": Array [
-          "Rpc client error: failed to deserialize response body.",
-        ],
+        "error": Object {
+          "errorMessages": Array [
+            "Rpc client error: failed to deserialize response body.",
+          ],
+        },
         "isOk": false,
       }
     `);

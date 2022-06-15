@@ -9,10 +9,19 @@ public class ProfileHandler
     public async Task<ProfileInfoResponse> ProfileInfo(ProfileInfoRequest req)
     {
         await Task.CompletedTask;
-        return new ProfileInfoResponse();
+        return new ProfileInfoResponse
+        {
+            Count = req.Count + 1,
+        };
     }
 }
 
-public class ProfileInfoRequest { }
+public class ProfileInfoRequest
+{
+    public int Count { get; set; }
+}
 
-public class ProfileInfoResponse { }
+public class ProfileInfoResponse
+{
+    public int Count { get; set; }
+}

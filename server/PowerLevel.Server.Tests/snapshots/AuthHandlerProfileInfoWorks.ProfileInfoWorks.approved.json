@@ -1,5 +1,7 @@
 ﻿{
-  "ErrorMessages": null,
+  "Error": null,
   "IsOk": true,
-  "Payload": {}
+  "Payload": {
+    "Count": 1
+  }
 }

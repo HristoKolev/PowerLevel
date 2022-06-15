@@ -1,7 +1,10 @@
 ﻿{
-  "ErrorMessages": [
-    "Wrong username or password."
-  ],
+  "Error": {
+    "ErrorID": null,
+    "ErrorMessages": [
+      "Wrong email or password."
+    ]
+  },
   "IsOk": false,
   "Payload": null
 }

@@ -1,7 +1,3 @@
-export type Result<T = null> =
-  | { isOk: true; payload: T }
-  | { isOk: false; errorMessages: string[] };
-
 export interface SelectItem<T = unknown> {
   value: T;
   label: string;

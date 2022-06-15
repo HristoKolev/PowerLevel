@@ -46,7 +46,7 @@ create table public.user_logins (
 
     enabled boolean not null,
 
-    username text not null,
+    email_address text not null,
     password_hash text not null,
 
     verification_code text,

@@ -28,7 +28,7 @@ public class RpcInputValidationMiddlewareTest
         var result = await rpcEngine.Execute(requestMessage, instanceProvider);
 
         Assert.False(result.IsOk);
-        Assert.Equal("__Number__", result.ErrorMessages.Single());
+        Assert.Equal("__Number__", (result.Error as ApiError)!.ErrorMessages.Single());
     }
 
     [Fact]

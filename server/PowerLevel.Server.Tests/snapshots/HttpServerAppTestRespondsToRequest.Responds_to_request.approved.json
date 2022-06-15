@@ -1,7 +1,7 @@
 ﻿{
+  "isOk": true,
+  "error": null,
   "payload": {
     "message": "Works."
-  },
-  "isOk": true,
-  "errorMessages": null
+  }
 }

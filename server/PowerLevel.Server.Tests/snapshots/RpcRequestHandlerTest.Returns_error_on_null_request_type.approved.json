@@ -1,7 +1,10 @@
 ﻿{
-  "payload": null,
   "isOk": false,
-  "errorMessages": [
-    "Request type is null or an empty string."
-  ]
+  "error": {
+    "errorMessages": [
+      "Request type is null or an empty string."
+    ],
+    "errorID": null
+  },
+  "payload": null
 }

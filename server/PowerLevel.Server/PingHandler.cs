@@ -17,9 +17,9 @@ public class PingHandler
     }
 }
 
+public class PingRequest { }
+
 public class PingResponse
 {
     public string Message { get; set; }
 }
-
-public class PingRequest { }

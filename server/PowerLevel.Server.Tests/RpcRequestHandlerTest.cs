@@ -16,9 +16,9 @@ public class RpcRequestHandlerTest
     public class IncrementHandler
     {
         [RpcBind(typeof(IncrementTestRequest), typeof(IncrementTestResponse))]
-        public Task<Result<IncrementTestResponse>> Increment(IncrementTestRequest req)
+        public Task<ApiResult<IncrementTestResponse>> Increment(IncrementTestRequest req)
         {
-            var result = Result.Ok(new IncrementTestResponse
+            var result = ApiResult.Ok(new IncrementTestResponse
             {
                 Num = req.Num + 1,
             });
@@ -27,7 +27,7 @@ public class RpcRequestHandlerTest
         }
 
         [RpcBind(typeof(ThrowingTestRequest), typeof(ThrowingTestResponse))]
-        public Task<Result<ThrowingTestResponse>> Increment(ThrowingTestRequest req)
+        public Task<ApiResult<ThrowingTestResponse>> Increment(ThrowingTestRequest req)
         {
             throw new DetailedException("Throwing from inside of a handler.");
         }

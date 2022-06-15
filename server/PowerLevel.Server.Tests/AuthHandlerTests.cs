@@ -27,7 +27,7 @@ public class AuthHandlerRegisterReturnsErrorWhenTheUsernameIsTaken : HttpServerA
 
         var result = await this.RpcClient.Register(new RegisterRequest
         {
-            Email = TEST_EMAIL,
+            EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
         });
 
@@ -50,7 +50,7 @@ public class AuthHandlerRegisterReturnsSuccessWhenANewProfileIsCreated : HttpSer
     {
         var result = await this.RpcClient.Register(new RegisterRequest
         {
-            Email = TEST_EMAIL,
+            EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
         });
 
@@ -82,7 +82,7 @@ public class AuthHandlerLoginReturnsAnErrorOnWrongUsername : HttpServerAppTest
     {
         var result = await this.RpcClient.Login(new LoginRequest
         {
-            Username = TEST_EMAIL,
+            EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
         });
 
@@ -108,7 +108,7 @@ public class AuthHandlerLoginReturnsAnErrorOnWrongPassword : HttpServerAppTest
 
         var result = await this.RpcClient.Login(new LoginRequest
         {
-            Username = TEST_EMAIL,
+            EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD + "wrong",
         });
 
@@ -136,7 +136,7 @@ public class AuthHandlerLoginReturnsAnErrorWhenTheLoginIsDisabled : HttpServerAp
 
         var result = await this.RpcClient.Login(new LoginRequest
         {
-            Username = TEST_EMAIL,
+            EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
         });
 
@@ -162,7 +162,7 @@ public class AuthHandlerLoginWorksInTheCorrectCase : HttpServerAppTest
 
         var result = await this.RpcClient.Login(new LoginRequest
         {
-            Username = TEST_EMAIL,
+            EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
         });
 

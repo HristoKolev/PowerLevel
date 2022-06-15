@@ -1,9 +1,9 @@
 ﻿{
   "login": {
+    "EmailAddress": "test@abc.de",
     "Enabled": true,
     "LoginID": 1,
     "PasswordHash": "$$password123$$",
-    "Username": "test@abc.de",
     "UserProfileID": 1,
     "VerificationCode": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     "Verified": false
@@ -14,12 +14,8 @@
     "UserProfileID": 1
   },
   "result": {
-    "ErrorMessages": null,
+    "Error": null,
     "IsOk": true,
-    "Payload": {
-      "CsrfToken": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-      "EmailAddress": "test@abc.de",
-      "UserProfileID": 1
-    }
+    "Payload": {}
   }
 }

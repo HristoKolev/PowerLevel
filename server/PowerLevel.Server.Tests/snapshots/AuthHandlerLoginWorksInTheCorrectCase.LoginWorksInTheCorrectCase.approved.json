@@ -1,5 +1,5 @@
 ﻿{
-  "ErrorMessages": null,
+  "Error": null,
   "IsOk": true,
   "Payload": {
     "CsrfToken": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",

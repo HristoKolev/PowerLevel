@@ -1,4 +1,4 @@
-import { Result } from '~infrastructure/helpers';
+import { ApiResult, DefaultApiError } from '~infrastructure/RpcClient';
 
 const errors = {
   networkError: 'Network error.',
@@ -10,9 +10,14 @@ const errors = {
     'Rpc client error: failed to deserialize response body.',
 };
 
-const errorResult = <TResponse>(errorMessage: string): Result<TResponse> => ({
+const errorResult = <
+  TResponse,
+  TError extends DefaultApiError = DefaultApiError
+>(
+  errorMessage: string
+): ApiResult<TResponse, TError> => ({
   isOk: false,
-  errorMessages: [errorMessage],
+  error: { errorMessages: [errorMessage] } as TError,
 });
 
 const reportError = (message: string, error?: unknown): void => {
@@ -26,10 +31,24 @@ const reportError = (message: string, error?: unknown): void => {
 };
 
 export class RpcClientHelper {
-  async send<TRequest, TResponse = void>(
+  private csrfToken: string | undefined;
+
+  setCSRFToken(csrfToken: string) {
+    this.csrfToken = csrfToken;
+  }
+
+  clearCSRFToken() {
+    this.csrfToken = undefined;
+  }
+
+  async send<
+    TRequest,
+    TResponse = void,
+    TError extends DefaultApiError = DefaultApiError
+  >(
     requestType: string,
     requestBody?: TRequest
-  ): Promise<Result<TResponse>> {
+  ): Promise<ApiResult<TResponse, TError>> {
     if (!requestType) {
       reportError(errors.falsyRequestType);
       return errorResult(errors.falsyRequestType);
@@ -44,6 +63,11 @@ export class RpcClientHelper {
         Accept: 'application/json',
       },
     };
+
+    if (this.csrfToken) {
+      const headers = request.headers as Record<string, string>;
+      headers['Csrf-Token'] = this.csrfToken;
+    }
 
     try {
       request.body = JSON.stringify(requestBody || {});
@@ -76,9 +100,9 @@ export class RpcClientHelper {
       return errorResult(errors.readRequestBodyError);
     }
 
-    let responseBody: Result<TResponse>;
+    let responseBody: ApiResult<TResponse, TError>;
     try {
-      responseBody = JSON.parse(json) as Result<TResponse>;
+      responseBody = JSON.parse(json) as ApiResult<TResponse, TError>;
     } catch (error) {
       reportError(errors.deserializeResponseError, error);
       return errorResult(errors.deserializeResponseError);

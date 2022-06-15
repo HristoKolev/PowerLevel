@@ -22,7 +22,7 @@ public static class CSharpCodeGenerator
 
     public static string Generate(List<RpcRequestMetadata> metadata)
     {
-        var methods = metadata.Select(x => $"    public virtual Task<Result<{x.ResponseType.Name}>> " +
+        var methods = metadata.Select(x => $"    public virtual Task<ApiResult<{x.ResponseType.Name}>> " +
                                            $"{GetMethodName(x)}({x.RequestType.Name} request)\n    {{\n    " +
                                            $"    return this.RpcExecute<{x.RequestType.Name}, {x.ResponseType.Name}>(request);\n    }}");
 
@@ -30,11 +30,11 @@ public static class CSharpCodeGenerator
 
 using System.Threading.Tasks;
 using Auth;
-using Xdxd.DotNet.Shared;
+using Infrastructure;
 
 public abstract class RpcClient
 {{
-    protected abstract Task<Result<TResponse>> RpcExecute<TRequest, TResponse>(TRequest request)
+    protected abstract Task<ApiResult<TResponse>> RpcExecute<TRequest, TResponse>(TRequest request)
         where TRequest : class where TResponse : class;
 
 {string.Join("\n\n", methods)}

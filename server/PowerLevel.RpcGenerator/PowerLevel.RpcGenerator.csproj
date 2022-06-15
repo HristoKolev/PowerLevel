@@ -6,6 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PowerLevel.Server\PowerLevel.Server.csproj" />
+    <ProjectReference Include="..\PowerLevel.Server\PowerLevel.Server.csproj"/>
   </ItemGroup>
 </Project>

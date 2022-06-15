@@ -29,7 +29,7 @@ public class RpcRequestHandler
 
     public async Task HandleRpcRequest(HttpRequestState httpRequestState)
     {
-        Result<object> result;
+        Result<object, object> result;
 
         try
         {
@@ -38,8 +38,7 @@ public class RpcRequestHandler
         catch (Exception err)
         {
             string errorID = await this.errorReporter.Error(err, "RPC_GENERAL_SERVER_ERROR");
-            httpRequestState.HttpContext.AddErrorIdHeader(errorID);
-            result = Result.Error<object>($"General RPC server error. ErrorID: {errorID}.");
+            result = ApiResult.Fail("General RPC server error.", errorID).ToGeneralForm();
         }
 
         try
@@ -53,12 +52,12 @@ public class RpcRequestHandler
         }
     }
 
-    private async Task<Result<object>> ProcessRequest(HttpRequestState httpRequestState)
+    private async Task<Result<object, object>> ProcessRequest(HttpRequestState httpRequestState)
     {
         // Find request metadata.
         if (string.IsNullOrWhiteSpace(httpRequestState.RpcState.RpcRequestType))
         {
-            return Result.Error<object>("Request type is null or an empty string.");
+            return ApiResult.Fail("Request type is null or an empty string.").ToGeneralForm();
         }
 
         // Read request body.
@@ -68,21 +67,20 @@ public class RpcRequestHandler
 
             if (httpRequestState.RpcState.RpcRequestBody.Memory.Length == 0)
             {
-                return Result.Error<object>("The HTTP request has an empty body.");
+                return ApiResult.Fail("The HTTP request has an empty body.").ToGeneralForm();
             }
         }
         catch (Exception err)
         {
             string errorID = await this.errorReporter.Error(err, "FAILED_TO_READ_RPC_BODY");
-            httpRequestState.HttpContext.AddErrorIdHeader(errorID);
-            return Result.Error<object>($"Failed to read RPC request body. ErrorID: {errorID}.");
+            return ApiResult.Fail("Failed to read RPC request body.", errorID).ToGeneralForm();
         }
 
         var metadata = this.rpcEngine.GetMetadataByRequestName(httpRequestState.RpcState.RpcRequestType);
 
         if (metadata == null)
         {
-            return Result.Error<object>($"No RPC handler for request. RequestType: {httpRequestState.RpcState.RpcRequestType}.");
+            return ApiResult.Fail($"No RPC handler for request. RequestType: {httpRequestState.RpcState.RpcRequestType}.").ToGeneralForm();
         }
 
         // Parse the RPC message.
@@ -96,8 +94,7 @@ public class RpcRequestHandler
         catch (Exception err)
         {
             string errorID = await this.errorReporter.Error(err, "FAILED_TO_PARSE_RPC_BODY");
-            httpRequestState.HttpContext.AddErrorIdHeader(errorID);
-            return Result.Error<object>($"Failed to parse RPC body. ErrorID: {errorID}.");
+            return ApiResult.Fail("Failed to parse RPC body.", errorID).ToGeneralForm();
         }
 
         // Execute.
@@ -114,8 +111,7 @@ public class RpcRequestHandler
         catch (Exception err)
         {
             string errorID = await this.errorReporter.Error(err);
-            httpRequestState.HttpContext.AddErrorIdHeader(errorID);
-            return Result.Error<object>($"Failed to execute RPC request. ErrorID: {errorID}.");
+            return ApiResult.Fail("Failed to execute RPC request.", errorID).ToGeneralForm();
         }
 
         return httpRequestState.RpcState.RpcResponse;
@@ -148,7 +144,7 @@ public class RpcAuthorizationMiddleware : RpcMiddleware
 
         if (authAttribute.RequiresAuthentication && !isAuthenticated)
         {
-            context.SetResponse(Result.Error(UNAUTHORIZED_ACCESS_MESSAGE));
+            context.SetResponse(ApiResult.Fail(UNAUTHORIZED_ACCESS_MESSAGE).ToGeneralForm());
             return;
         }
 
@@ -166,7 +162,7 @@ public class RpcInputValidationMiddleware : RpcMiddleware
 
         if (!validationResult.IsOk)
         {
-            context.SetResponse(validationResult);
+            context.SetResponse(ApiResult.Fail(validationResult.Error).ToGeneralForm());
             return;
         }
 
@@ -205,7 +201,7 @@ public class RpcRequestState : IDisposable
 
     public object RpcRequestPayload { get; set; }
 
-    public Result<object> RpcResponse { get; set; }
+    public Result<object, object> RpcResponse { get; set; }
 
     public void Dispose()
     {
@@ -213,16 +209,8 @@ public class RpcRequestState : IDisposable
     }
 }
 
-public static class HttpContextAppExtensions
-{
-    public static void AddErrorIdHeader(this HttpContext httpContext, string errorID)
-    {
-        if (!httpContext.Response.HasStarted)
-        {
-            httpContext.Response.Headers["errorID"] = errorID;
-        }
-    }
-}
+[AttributeUsage(AttributeTargets.Property)]
+public sealed class RpcNullableAttribute : Attribute { }
 
 public class HttpLogData : AppInfoEventData
 {

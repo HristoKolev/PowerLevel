@@ -44,11 +44,11 @@ public class HttpServerAppTest : AppDatabaseTest
 
     protected virtual void ConfigureMocks(ContainerBuilder builder) { }
 
-    protected async Task<RegisterResponse> CreateProfile()
+    protected async Task<LoginResponse> CreateProfile()
     {
         var registerResult = await this.RpcClient.Register(new RegisterRequest
         {
-            Email = TEST_EMAIL,
+            EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
         });
 
@@ -57,7 +57,18 @@ public class HttpServerAppTest : AppDatabaseTest
             throw new DetailedException("The `RegisterRequest` call failed.");
         }
 
-        return registerResult.Payload;
+        var loginResult = await this.RpcClient.Login(new LoginRequest
+        {
+            EmailAddress = TEST_EMAIL,
+            Password = TEST_PASSWORD,
+        });
+
+        if (!loginResult.IsOk)
+        {
+            throw new DetailedException("The `LoginRequest` call failed.");
+        }
+
+        return loginResult.Payload;
     }
 }
 
@@ -157,7 +168,7 @@ public class TestRpcClient : RpcClient
         };
     }
 
-    protected override async Task<Result<TResponse>> RpcExecute<TRequest, TResponse>(TRequest request)
+    protected override async Task<ApiResult<TResponse>> RpcExecute<TRequest, TResponse>(TRequest request)
     {
         var response = await this.httpClient.SendAsync(new HttpRequestMessage
         {
@@ -177,16 +188,11 @@ public class TestRpcClient : RpcClient
 
         string responseBody = await response.Content.ReadAsStringAsync();
 
-        var result = JsonHelper.Deserialize<Result<TResponse>>(responseBody);
+        var result = JsonHelper.Deserialize<ApiResult<TResponse>>(responseBody);
 
         if (result.Payload is LoginResponse loginResponse)
         {
             this.CsrfToken = loginResponse.CsrfToken;
-        }
-
-        if (result.Payload is RegisterResponse registerResponse)
-        {
-            this.CsrfToken = registerResponse.CsrfToken;
         }
 
         return result;
