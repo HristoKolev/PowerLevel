@@ -745,8 +745,8 @@ public class UserSessionPoco : IPoco<UserSessionPoco>
                 NpgsqlDbType = NpgsqlDbType.Text,
             },
             this.ExpirationDate.HasValue
-                ? new NpgsqlParameter<DateTime> {TypedValue = this.ExpirationDate.Value, NpgsqlDbType = NpgsqlDbType.TimestampTz}
-                : new NpgsqlParameter {Value = DBNull.Value},
+                ? new NpgsqlParameter<DateTime> { TypedValue = this.ExpirationDate.Value, NpgsqlDbType = NpgsqlDbType.TimestampTz }
+                : new NpgsqlParameter { Value = DBNull.Value },
             new NpgsqlParameter<DateTime>
             {
                 TypedValue = this.LoginDate,
@@ -1917,6 +1917,5 @@ public class DbMetadata
                 "profile_id",
             },
         };
-
     }
 }

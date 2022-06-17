@@ -1,4 +1,4 @@
-import { RpcClientHelper } from './RpcClientHelper';
+import { BaseRpcClient } from './BaseRpcClient';
 
 // eslint-disable-next-line no-console
 console.error = jest.fn();
@@ -16,7 +16,7 @@ const parseMock = JSON.parse as jest.Mock;
 window.fetch = jest.fn();
 const fetchMock = window.fetch as jest.Mock;
 
-describe('RpcClientHelper.send', () => {
+describe('BaseRpcClient.sendResult', () => {
   afterEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
@@ -26,8 +26,8 @@ describe('RpcClientHelper.send', () => {
   });
 
   test('returns error result on falsy requestType', async () => {
-    const helper = new RpcClientHelper();
-    const result = await helper.send(null as unknown as string);
+    const baseClient = new BaseRpcClient();
+    const result = await baseClient.sendResult(null as unknown as string);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "error": Object {
@@ -46,8 +46,8 @@ describe('RpcClientHelper.send', () => {
       throw new Error('Serialization failed.');
     });
 
-    const helper = new RpcClientHelper();
-    const result = await helper.send('TestRequest');
+    const baseClient = new BaseRpcClient();
+    const result = await baseClient.sendResult('TestRequest');
 
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -68,8 +68,8 @@ describe('RpcClientHelper.send', () => {
       throw new Error('Fetch failed.');
     });
 
-    const helper = new RpcClientHelper();
-    const result = await helper.send('TestRequest');
+    const baseClient = new BaseRpcClient();
+    const result = await baseClient.sendResult('TestRequest');
 
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -88,8 +88,8 @@ describe('RpcClientHelper.send', () => {
   test('returns error result on non 200 status code', async () => {
     fetchMock.mockImplementation(() => Promise.resolve({ status: 500 }));
 
-    const helper = new RpcClientHelper();
-    const result = await helper.send('TestRequest');
+    const baseClient = new BaseRpcClient();
+    const result = await baseClient.sendResult('TestRequest');
 
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -113,8 +113,8 @@ describe('RpcClientHelper.send', () => {
       })
     );
 
-    const helper = new RpcClientHelper();
-    const result = await helper.send('TestRequest');
+    const baseClient = new BaseRpcClient();
+    const result = await baseClient.sendResult('TestRequest');
 
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -142,8 +142,8 @@ describe('RpcClientHelper.send', () => {
       throw new Error('Error parsing response body.');
     });
 
-    const helper = new RpcClientHelper();
-    const result = await helper.send('TestRequest');
+    const baseClient = new BaseRpcClient();
+    const result = await baseClient.sendResult('TestRequest');
 
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -167,8 +167,8 @@ describe('RpcClientHelper.send', () => {
       })
     );
 
-    const helper = new RpcClientHelper();
-    await helper.send('TestRequest', { testInput: 123 });
+    const baseClient = new BaseRpcClient();
+    await baseClient.sendResult('TestRequest', { testInput: 123 });
 
     expect(fetchMock).toHaveBeenCalledWith('/rpc/TestRequest', {
       body: '{"testInput":123}',
@@ -188,8 +188,8 @@ describe('RpcClientHelper.send', () => {
       })
     );
 
-    const helper = new RpcClientHelper();
-    const result = await helper.send('TestRequest');
+    const baseClient = new BaseRpcClient();
+    const result = await baseClient.sendResult('TestRequest');
 
     expect(result).toMatchInlineSnapshot(`
       Object {

@@ -12,31 +12,18 @@ using Xdxd.DotNet.Shared;
 
 public static class TypeScriptCodeGenerator
 {
-    private static readonly List<string> ImportStatements = new()
-    {
-        "// eslint-disable-next-line eslint-comments/disable-enable-pair",
-        "/* eslint-disable prettier/prettier */",
-        "import { RpcClientHelper } from '~infrastructure/RpcClientHelper';",
-    };
-
     public static string Generate(List<RpcRequestMetadata> metadata)
     {
-        var types = metadata.Select(x => x.RequestType)
-            .Concat(metadata.Select(x => x.ResponseType))
-            .Concat(metadata.Select(x => GetResultErrorType(x.HandlerMethod.ReturnType)))
-            .Where(x => x != null)
-            .ToList();
+        string fileHeader = @"// eslint-disable-next-line eslint-comments/disable-enable-pair
+/* eslint-disable prettier/prettier */
+import { BaseRpcClient, ApiResult } from './BaseRpcClient';
 
-        string importContents = string.Join("\n", ImportStatements);
-        string dtoContents = string.Join("\n\n", ResolveNestedDtoTypes(types).Select(GetTypeScriptDefinition).Where(x => x != null));
+";
 
-        string resultTypeDefinition = @"
-export type ApiResult<TPayload = null, TError extends DefaultApiError = DefaultApiError> =
-  { isOk: true; payload: TPayload } | { isOk: false; error: TError };";
+        string interfaces = GenerateInterfaces(metadata);
+        string resultClient = GenerateResultClient(metadata);
 
-        string rpcClientContents = BuildServerApiClient(metadata);
-
-        return importContents + "\n\n" + dtoContents + "\n" + resultTypeDefinition + "\n" + rpcClientContents;
+        return fileHeader + interfaces + resultClient;
     }
 
     private static Type GetResultErrorType(Type methodReturnType)
@@ -254,9 +241,9 @@ export type ApiResult<TPayload = null, TError extends DefaultApiError = DefaultA
     }
 
     /// <summary>
-    /// Builds the RpcClient TypeScript type that contains a function for every request.
+    /// Generates a class with method for each endpoints that returns Promise{ApiResult{TPayload, TError}}.
     /// </summary>
-    private static string BuildServerApiClient(List<RpcRequestMetadata> metadataList)
+    private static string GenerateResultClient(List<RpcRequestMetadata> metadataList)
     {
         string GetMethodName(RpcRequestMetadata metadata)
         {
@@ -280,7 +267,14 @@ export type ApiResult<TPayload = null, TError extends DefaultApiError = DefaultA
                 : $"ApiResult<{metadata.ResponseType.Name}{errorTypeArgument}>";
         }
 
-        string functions = string.Join("\n", metadataList.Select((metadata, index) =>
+        string GetDirectResponseType(RpcRequestMetadata metadata)
+        {
+            return metadata.ResponseType == null || GetTypeScriptDefinition(metadata.ResponseType) == null
+                ? "void"
+                : metadata.ResponseType.Name;
+        }
+
+        var resultFunctions = metadataList.Select(metadata =>
         {
             var requestArgument = "";
             var requestParameter = "";
@@ -291,28 +285,56 @@ export type ApiResult<TPayload = null, TError extends DefaultApiError = DefaultA
                 requestParameter = ", request";
             }
 
-            string result = $"  {GetMethodName(metadata)}({requestArgument}): Promise<{GetResponseType(metadata)}> {{\n";
-            result += $"    return this.helper.send('{metadata.RequestType.Name}'{requestParameter});\n";
+            string result = $"  {GetMethodName(metadata)}Result({requestArgument}): Promise<{GetResponseType(metadata)}> {{\n";
+            result += $"    return this.baseClient.sendResult('{metadata.RequestType.Name}'{requestParameter});\n";
             result += "  }";
 
-            if (index != metadataList.Count - 1)
+            return result;
+        }).ToList();
+
+        var directFunctions = metadataList.Select(metadata =>
+        {
+            var requestArgument = "";
+            var requestParameter = "";
+            string requestType = GetRequestType(metadata);
+            if (requestType != null)
             {
-                result += "\n";
+                requestArgument = $"request: {requestType}";
+                requestParameter = ", request";
             }
 
+            string result = $"  {GetMethodName(metadata)}({requestArgument}): Promise<{GetDirectResponseType(metadata)}> {{\n";
+            result += $"    return this.baseClient.send('{metadata.RequestType.Name}'{requestParameter});\n";
+            result += "  }";
+
             return result;
-        }));
+        }).ToList();
 
-        return @$"
-export class RpcClient {{
-  private helper: RpcClientHelper;
+        string functions = string.Join("\n\n", resultFunctions.Concat(directFunctions).OrderBy(x => x));
 
-  constructor(helper: RpcClientHelper) {{
-    this.helper = helper;
+        return @$"export class RpcClient {{
+  private baseClient: BaseRpcClient;
+
+  constructor(baseClient: BaseRpcClient) {{
+    this.baseClient = baseClient;
   }}
 
 {functions}
 }}
 ";
+    }
+
+    /// <summary>
+    /// Generates TypeScript interfaces for request, response and error types.
+    /// </summary>
+    private static string GenerateInterfaces(List<RpcRequestMetadata> metadata)
+    {
+        var types = metadata.Select(x => x.RequestType)
+            .Concat(metadata.Select(x => x.ResponseType))
+            .Concat(metadata.Select(x => GetResultErrorType(x.HandlerMethod.ReturnType)))
+            .Where(x => x != null)
+            .ToList();
+
+        return string.Join("\n\n", ResolveNestedDtoTypes(types).Select(GetTypeScriptDefinition).Where(x => x != null)) + "\n\n";
     }
 }

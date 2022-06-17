@@ -17,14 +17,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="JWT" Version="9.0.3" />
-    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="6.0.5" />
-    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
-    <PackageReference Include="Xdxd.DotNet.Http" Version="1.0.3" />
-    <PackageReference Include="Xdxd.DotNet.Rpc" Version="1.0.4" />
-    <PackageReference Include="Autofac" Version="6.4.0" />
-    <PackageReference Include="Xdxd.DotNet.Logging" Version="1.0.3" />
-    <PackageReference Include="Xdxd.DotNet.Postgres" Version="1.0.3" />
-    <PackageReference Include="Xdxd.DotNet.Shared" Version="1.0.6" />
+    <PackageReference Include="JWT" Version="9.0.3"/>
+    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="6.0.5"/>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3"/>
+    <PackageReference Include="Xdxd.DotNet.Http" Version="1.0.3"/>
+    <PackageReference Include="Xdxd.DotNet.Rpc" Version="1.0.4"/>
+    <PackageReference Include="Autofac" Version="6.4.0"/>
+    <PackageReference Include="Xdxd.DotNet.Logging" Version="1.0.3"/>
+    <PackageReference Include="Xdxd.DotNet.Postgres" Version="1.0.3"/>
+    <PackageReference Include="Xdxd.DotNet.Shared" Version="1.0.6"/>
   </ItemGroup>
 </Project>

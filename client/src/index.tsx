@@ -10,16 +10,7 @@ import { createStore } from '~infrastructure/redux-store';
 import { App } from '~components/App';
 import { createDrawerResizeObserver } from '~layout/createDrawerResizeObserver';
 import { menuDrawerActions } from '~layout/menuDrawerSlice';
-import { RpcClientHelper } from '~infrastructure/RpcClientHelper';
-import { ApiResult, RpcClient } from '~infrastructure/RpcClient';
-
-function unwrapResult<T>(result: ApiResult<T>): T {
-  if (!result.isOk) {
-    throw new Error(result.error.errorMessages.join(', '));
-  }
-
-  return result.payload;
-}
+import { BaseRpcClient, RpcClient } from '~rpc';
 
 if (window.__browserSupported) {
   if ('serviceWorker' in navigator) {
@@ -27,20 +18,25 @@ if (window.__browserSupported) {
   }
 
   void (async () => {
-    const rpcHelper = new RpcClientHelper();
+    const rpcHelper = new BaseRpcClient();
     const rpcClient = new RpcClient(rpcHelper);
 
-    const loginResult = unwrapResult(
-      await rpcClient.login({
-        emailAddress: 'test@test.test',
-        password: 'test@test.test',
-        rememberMe: false,
-      })
-    );
+    const loginResponse = await rpcClient.login({
+      emailAddress: 'test@test.test',
+      password: 'test@test.test',
+      rememberMe: false,
+    });
 
-    rpcHelper.setCSRFToken(loginResult.csrfToken);
+    // eslint-disable-next-line no-console
+    console.log(loginResponse);
 
-    unwrapResult(await rpcClient.profileInfo({ count: 2 }));
+    rpcHelper.setCSRFToken(loginResponse.csrfToken);
+
+    const profileInfoResponse = await rpcClient.profileInfo({ count: 2 });
+
+    // eslint-disable-next-line no-console
+    console.log(profileInfoResponse);
+
     // eslint-disable-next-line no-console
   })().catch(console.error);
 

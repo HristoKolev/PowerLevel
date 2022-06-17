@@ -1,4 +1,20 @@
-import { ApiResult, DefaultApiError } from '~infrastructure/RpcClient';
+import { DefaultApiError } from './RpcClient';
+
+export type ApiResult<
+  TPayload = null,
+  TError extends DefaultApiError = DefaultApiError
+> = { isOk: true; payload: TPayload } | { isOk: false; error: TError };
+
+class RpcErrorImpl extends Error {
+  constructor(error: DefaultApiError) {
+    const { errorMessages, ...rest } = error;
+    super(errorMessages.join(', '));
+    Object.assign(this, rest);
+  }
+}
+
+export type RpcError<TError extends DefaultApiError = DefaultApiError> =
+  RpcErrorImpl & Omit<TError, 'errorMessages'>;
 
 const errors = {
   networkError: 'Network error.',
@@ -30,7 +46,7 @@ const reportError = (message: string, error?: unknown): void => {
   }
 };
 
-export class RpcClientHelper {
+export class BaseRpcClient {
   private csrfToken: string | undefined;
 
   setCSRFToken(csrfToken: string) {
@@ -41,7 +57,7 @@ export class RpcClientHelper {
     this.csrfToken = undefined;
   }
 
-  async send<
+  async sendResult<
     TRequest,
     TResponse = void,
     TError extends DefaultApiError = DefaultApiError
@@ -109,5 +125,21 @@ export class RpcClientHelper {
     }
 
     return responseBody;
+  }
+
+  async send<TRequest, TResponse = void>(
+    requestType: string,
+    requestBody?: TRequest
+  ): Promise<TResponse> {
+    const result = await this.sendResult<TRequest, TResponse, DefaultApiError>(
+      requestType,
+      requestBody
+    );
+
+    if (!result.isOk) {
+      throw new RpcErrorImpl(result.error);
+    }
+
+    return result.payload;
   }
 }
