@@ -1,6 +1,6 @@
 import { createSlice, Selector } from '@reduxjs/toolkit';
 
-import { RootState } from '~infrastructure/redux-store';
+import { RootState } from '~infrastructure/redux';
 
 interface GlobalState {
   count: number;

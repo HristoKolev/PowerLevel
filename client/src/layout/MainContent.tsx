@@ -1,11 +1,9 @@
 import { memo, ReactNode } from 'react';
 import { css } from '@linaria/core';
 
-import { useAppSelector } from '~infrastructure/redux-store';
-import {
-  menuDrawerSelector,
-  ResponsiveDrawerBreakpoint,
-} from '~layout/menuDrawerSlice';
+import { useAppSelector } from '~infrastructure/redux';
+
+import { layoutSelector, ResponsiveDrawerBreakpoint } from './layoutSlice';
 
 const mainContentClassName = css`
   transition: margin 190ms cubic-bezier(0.4, 0, 0.6, 1) 0ms;
@@ -32,7 +30,7 @@ interface MainContentProps {
 
 export const MainContent = memo(
   ({ children }: MainContentProps): JSX.Element => {
-    const { open, breakpoint } = useAppSelector(menuDrawerSelector);
+    const { open, breakpoint } = useAppSelector(layoutSelector);
     return (
       <main
         className={`flex-grow p-3 ${mainContentClassName} ${

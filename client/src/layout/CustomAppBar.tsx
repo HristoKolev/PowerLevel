@@ -1,15 +1,16 @@
 import { memo, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { css } from '@linaria/core';
 import { IconButton, Toolbar, AppBar, Button } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Link } from 'react-router-dom';
+
+import { useAppDispatch, useAppSelector } from '~infrastructure/redux';
 
 import {
-  menuDrawerActions,
-  menuDrawerSelector,
+  layoutActions,
+  layoutSelector,
   ResponsiveDrawerBreakpoint,
-} from '~layout/menuDrawerSlice';
-import { useAppDispatch, useAppSelector } from '~infrastructure/redux-store';
+} from './layoutSlice';
 
 const customAppBarClassName = css`
   transition: margin 190ms cubic-bezier(0.4, 0, 0.6, 1) 0ms,
@@ -34,10 +35,10 @@ const customAppBarClassName = css`
 export const CustomAppBar = memo((): JSX.Element => {
   const dispatch = useAppDispatch();
 
-  const { open, breakpoint } = useAppSelector(menuDrawerSelector);
+  const { open, breakpoint } = useAppSelector(layoutSelector);
 
   const handleOnIconClick = useCallback(() => {
-    dispatch(menuDrawerActions.toggleDrawer());
+    dispatch(layoutActions.toggleDrawer());
   }, [dispatch]);
 
   return (
@@ -57,11 +58,11 @@ export const CustomAppBar = memo((): JSX.Element => {
           edge="start"
           className={`mr-2 ${open ? 'hidden' : ''}`}
         >
-          <MenuIcon />
+          <MenuIcon data-testid="app-bar-drawer-toggle" />
         </IconButton>
 
         <div className="font-medium ml-3 brand-name flex-grow">
-          <Link to="/" className="link">
+          <Link to="/" className="link" data-testid="brand-name">
             Power Level
           </Link>
         </div>

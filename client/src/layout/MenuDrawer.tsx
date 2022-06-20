@@ -13,8 +13,9 @@ import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import { css } from '@linaria/core';
 
-import { useAppDispatch, useAppSelector } from '~infrastructure/redux-store';
-import { menuDrawerActions, menuDrawerSelector } from '~layout/menuDrawerSlice';
+import { useAppDispatch, useAppSelector } from '~infrastructure/redux';
+
+import { layoutActions, layoutSelector } from './layoutSlice';
 
 const customDrawerClassName = css`
   width: var(--custom-drawer-width);
@@ -36,10 +37,10 @@ const customDrawerClassName = css`
 export const MenuDrawer = memo((): JSX.Element => {
   const dispatch = useAppDispatch();
 
-  const { open } = useAppSelector(menuDrawerSelector);
+  const { open } = useAppSelector(layoutSelector);
 
   const handleOnIconClick = useCallback(() => {
-    dispatch(menuDrawerActions.toggleDrawer());
+    dispatch(layoutActions.toggleDrawer());
   }, [dispatch]);
 
   return (
@@ -50,8 +51,13 @@ export const MenuDrawer = memo((): JSX.Element => {
       open={open}
     >
       <div className={`flex items-center justify-between py-1 drawer-header`}>
-        <div className="flex-auto text-center font-bold select-none">Menu</div>
-        <IconButton onClick={handleOnIconClick}>
+        <div
+          className="flex-auto text-center font-bold select-none"
+          data-testid="drawer-menu-title"
+        >
+          Menu
+        </div>
+        <IconButton onClick={handleOnIconClick} data-testid="drawer-toggle">
           <ChevronLeftIcon />
         </IconButton>
       </div>

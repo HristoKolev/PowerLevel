@@ -200,7 +200,7 @@ public class AuthServiceImpl : AuthService
             LoginDate = this.dateTimeService.EventTime(),
             LoginID = loginID,
             ProfileID = userProfileID,
-            ExpirationDate = rememberMe ? null : this.dateTimeService.EventTime().AddHours(3),
+            ExpirationDate = rememberMe ? this.dateTimeService.EventTime().AddDays(30) : this.dateTimeService.EventTime().AddHours(3),
             CsrfToken = this.rngService.GenerateSecureString(40),
         };
 

@@ -10,7 +10,6 @@ const StylelintPlugin = require('stylelint-webpack-plugin');
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
 const FaviconsWebpackFixerPlugin = require('./FaviconsWebpackFixerPlugin');
-const BrowserSyncConfig = require('./browsersync-config');
 
 const pwaPlugins = [
   new FaviconsWebpackPlugin({
@@ -143,7 +142,7 @@ module.exports = {
     }),
     ...(process.env.NODE_ENV === 'development'
       ? [
-          new BrowserSyncPlugin(BrowserSyncConfig),
+          new BrowserSyncPlugin(require('./browsersync-config')),
           ...(process.env.PWA_DEV === 'true' ? pwaPlugins : []),
         ]
       : []),

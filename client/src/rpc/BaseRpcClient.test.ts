@@ -1,31 +1,30 @@
-import { BaseRpcClient } from './BaseRpcClient';
+import { BaseRpcClient, RpcError, ApiResult } from './BaseRpcClient';
 
-// eslint-disable-next-line no-console
-console.error = jest.fn();
-// eslint-disable-next-line no-console
-const consoleErrorMock = console.error;
+const consoleErrorMock = jest.fn();
+Reflect.set(console, 'error', consoleErrorMock);
 
 const originalStringify = JSON.stringify;
-JSON.stringify = jest.fn(originalStringify) as typeof JSON.stringify;
-const stringifyMock = JSON.stringify as jest.Mock;
+const stringifyMock = jest.fn(originalStringify);
+JSON.stringify = stringifyMock as typeof JSON.stringify;
 
 const originalParse = JSON.parse;
-JSON.parse = jest.fn(originalParse) as typeof JSON.parse;
-const parseMock = JSON.parse as jest.Mock;
+const parseMock = jest.fn(originalParse);
+JSON.parse = parseMock as typeof JSON.parse;
 
-window.fetch = jest.fn();
-const fetchMock = window.fetch as jest.Mock;
+const fetchMock = jest.fn();
+window.fetch = fetchMock;
 
-describe('BaseRpcClient.sendResult', () => {
+describe('BaseRpcClient', () => {
   afterEach(() => {
     jest.resetAllMocks();
+    jest.restoreAllMocks();
     jest.resetModules();
 
     stringifyMock.mockImplementation(originalStringify);
     parseMock.mockImplementation(originalParse);
   });
 
-  test('returns error result on falsy requestType', async () => {
+  test('sendResult returns error result on falsy requestType', async () => {
     const baseClient = new BaseRpcClient();
     const result = await baseClient.sendResult(null as unknown as string);
     expect(result).toMatchInlineSnapshot(`
@@ -41,7 +40,7 @@ describe('BaseRpcClient.sendResult', () => {
     expect(consoleErrorMock).toHaveBeenCalled();
   });
 
-  test('returns error result on serialization error', async () => {
+  test('sendResult returns error result on serialization error', async () => {
     stringifyMock.mockImplementation(() => {
       throw new Error('Serialization failed.');
     });
@@ -63,7 +62,7 @@ describe('BaseRpcClient.sendResult', () => {
     expect(consoleErrorMock).toHaveBeenCalled();
   });
 
-  test('returns error result on fetch error', async () => {
+  test('sendResult returns error result on fetch error', async () => {
     fetchMock.mockImplementation(() => {
       throw new Error('Fetch failed.');
     });
@@ -85,7 +84,7 @@ describe('BaseRpcClient.sendResult', () => {
     expect(consoleErrorMock).toHaveBeenCalled();
   });
 
-  test('returns error result on non 200 status code', async () => {
+  test('sendResult returns error result on non 200 status code', async () => {
     fetchMock.mockImplementation(() => Promise.resolve({ status: 500 }));
 
     const baseClient = new BaseRpcClient();
@@ -103,7 +102,7 @@ describe('BaseRpcClient.sendResult', () => {
     `);
   });
 
-  test('returns error result on failure to read the response', async () => {
+  test('sendResult returns error result on failure to read the response', async () => {
     fetchMock.mockImplementation(() =>
       Promise.resolve({
         status: 200,
@@ -130,7 +129,7 @@ describe('BaseRpcClient.sendResult', () => {
     expect(consoleErrorMock).toHaveBeenCalled();
   });
 
-  test('returns error result on failure to parse the response', async () => {
+  test('sendResult returns error result on failure to parse the response', async () => {
     fetchMock.mockImplementation(() =>
       Promise.resolve({
         status: 200,
@@ -168,10 +167,13 @@ describe('BaseRpcClient.sendResult', () => {
     );
 
     const baseClient = new BaseRpcClient();
-    await baseClient.sendResult('TestRequest', { testInput: 123 });
+
+    const requestBody = { testInput: 123 };
+
+    await baseClient.sendResult('TestRequest', requestBody);
 
     expect(fetchMock).toHaveBeenCalledWith('/rpc/TestRequest', {
-      body: '{"testInput":123}',
+      body: JSON.stringify(requestBody),
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
@@ -180,7 +182,28 @@ describe('BaseRpcClient.sendResult', () => {
     });
   });
 
-  test('returns response body on successful response', async () => {
+  test('sendResult returns response body on successful response', async () => {
+    const mockResult: ApiResult<{ test: number }> = {
+      isOk: true,
+      payload: { test: 123 },
+    };
+
+    fetchMock.mockImplementation(() =>
+      Promise.resolve({
+        status: 200,
+        text: () => JSON.stringify(mockResult),
+      })
+    );
+
+    const baseClient = new BaseRpcClient();
+    const result = await baseClient.sendResult('TestRequest');
+
+    expect(result).toEqual(mockResult);
+
+    expect(consoleErrorMock).not.toHaveBeenCalled();
+  });
+
+  test('CSRF token is sent to the server', async () => {
     fetchMock.mockImplementation(() =>
       Promise.resolve({
         status: 200,
@@ -188,18 +211,89 @@ describe('BaseRpcClient.sendResult', () => {
       })
     );
 
+    const csrfToken = '[Token]';
+
     const baseClient = new BaseRpcClient();
-    const result = await baseClient.sendResult('TestRequest');
 
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "isOk": true,
-        "payload": Object {
-          "test": 123,
-        },
-      }
-    `);
+    baseClient.setCSRFToken(csrfToken);
 
-    expect(consoleErrorMock).not.toHaveBeenCalled();
+    await baseClient.sendResult('TestRequest');
+
+    expect(fetchMock).toHaveBeenCalledWith('/rpc/TestRequest', {
+      body: '{}',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'Csrf-Token': csrfToken,
+      },
+      method: 'POST',
+    });
+
+    fetchMock.mockClear();
+
+    baseClient.clearCSRFToken();
+
+    await baseClient.sendResult('TestRequest');
+
+    expect(fetchMock).toHaveBeenCalledWith('/rpc/TestRequest', {
+      body: '{}',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    });
+  });
+
+  test('send returns payload on success', async () => {
+    const result: ApiResult<{ test: number }> = {
+      isOk: true,
+      payload: { test: 123 },
+    };
+
+    fetchMock.mockImplementation(() =>
+      Promise.resolve({
+        status: 200,
+        text: () => JSON.stringify(result),
+      })
+    );
+
+    const baseClient = new BaseRpcClient();
+
+    const payload = await baseClient.send('TestRequest');
+
+    expect(payload).toEqual(result.payload);
+  });
+
+  test('throws RpcError on failure', async () => {
+    const result: ApiResult = {
+      isOk: false,
+      error: {
+        errorID: '123',
+        errorMessages: [
+          'This is the first error message',
+          'This is the second error message',
+        ],
+      },
+    };
+
+    fetchMock.mockImplementation(() =>
+      Promise.resolve({
+        status: 200,
+        text: () => JSON.stringify(result),
+      })
+    );
+
+    const baseClient = new BaseRpcClient();
+
+    try {
+      await baseClient.send('TestRequest');
+      throw new Error('baseClient.send should have thrown an error.');
+    } catch (error) {
+      const rpcError = error as RpcError;
+
+      expect(rpcError.errorID).toEqual(result.error.errorID);
+      expect(rpcError.message).toEqual(result.error.errorMessages.join(', '));
+    }
   });
 });

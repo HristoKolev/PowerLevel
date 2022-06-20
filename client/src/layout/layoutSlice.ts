@@ -1,28 +1,28 @@
 import { createSlice, PayloadAction, Selector } from '@reduxjs/toolkit';
 
-import { RootState } from '~infrastructure/redux-store';
+import { RootState } from '~infrastructure/redux';
 
 export enum ResponsiveDrawerBreakpoint {
   Overlaid = 900,
   SideBySide = Number.MAX_SAFE_INTEGER,
 }
 
-interface MenuDrawerState {
+interface LayoutState {
   open: boolean;
-  breakpoint: ResponsiveDrawerBreakpoint | undefined;
+  breakpoint: ResponsiveDrawerBreakpoint;
 }
 
-const initialState: MenuDrawerState = {
+const initialState: LayoutState = {
   open: false,
-  breakpoint: undefined,
+  breakpoint: ResponsiveDrawerBreakpoint.Overlaid,
 };
 
 interface ChangeDrawerBreakpoint {
   breakpoint: ResponsiveDrawerBreakpoint;
 }
 
-export const menuDrawerSlice = createSlice({
-  name: 'MENU_DRAWER',
+export const layoutSlice = createSlice({
+  name: 'LAYOUT',
   initialState,
   extraReducers: {},
   reducers: {
@@ -38,8 +38,7 @@ export const menuDrawerSlice = createSlice({
   },
 });
 
-export const menuDrawerSelector: Selector<RootState, MenuDrawerState> = (
-  state
-) => state[menuDrawerSlice.name];
+export const layoutSelector: Selector<RootState, LayoutState> = (state) =>
+  state[layoutSlice.name];
 
-export const menuDrawerActions = menuDrawerSlice.actions;
+export const layoutActions = layoutSlice.actions;

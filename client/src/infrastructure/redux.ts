@@ -2,13 +2,13 @@ import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
 import { globalSlice } from '~components/globalSlice';
-import { menuDrawerSlice } from '~layout/menuDrawerSlice';
+import { layoutSlice } from '~layout';
 
 export const createStore = () =>
   configureStore({
     reducer: {
       [globalSlice.name]: globalSlice.reducer,
-      [menuDrawerSlice.name]: menuDrawerSlice.reducer,
+      [layoutSlice.name]: layoutSlice.reducer,
     },
   });
 

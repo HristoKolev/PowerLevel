@@ -1,9 +1,9 @@
-import { ResponsiveDrawerBreakpoint } from '~layout/menuDrawerSlice';
+import { ResponsiveDrawerBreakpoint } from './layoutSlice';
 
 export const createDrawerResizeObserver = (
   element: Element,
   callback: (breakpoint: ResponsiveDrawerBreakpoint) => void
-): void => {
+): ResizeObserver => {
   const allSizes = (
     Object.values(ResponsiveDrawerBreakpoint).filter(
       (x) => typeof x === 'number'
@@ -29,4 +29,6 @@ export const createDrawerResizeObserver = (
   });
 
   observer.observe(element);
+
+  return observer;
 };
