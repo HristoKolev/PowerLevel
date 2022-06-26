@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import { StoreType } from '~infrastructure/redux';
 import { HomePage } from '~components/HomePage';
 import { NotFoundPage } from '~components/NotFoundPage';
-import { LoginPage } from '~components/LoginPage';
+import { SignInPage } from '~components/SignInPage';
 import { Layout } from '~layout';
 
 interface AppProps {
@@ -21,7 +21,7 @@ export const App = memo(({ store }: AppProps) => (
         <Layout>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="login" element={<LoginPage />} />
+            <Route path="sign-in" element={<SignInPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Layout>

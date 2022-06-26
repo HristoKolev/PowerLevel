@@ -67,8 +67,8 @@ export const CustomAppBar = memo((): JSX.Element => {
           </Link>
         </div>
 
-        <Link to="/login" className="link">
-          <Button color="inherit">Login</Button>
+        <Link to="/sign-in" className="link">
+          <Button color="inherit">Sign in</Button>
         </Link>
       </Toolbar>
     </AppBar>
