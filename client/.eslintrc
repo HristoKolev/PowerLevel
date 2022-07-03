@@ -48,6 +48,8 @@
     }
   },
   "rules": {
+    "object-shorthand": 2,
+    "eqeqeq": "error",
     "jest/no-conditional-expect": ["off"],
     "@typescript-eslint/no-explicit-any": ["error"],
     "prettier/prettier": ["error"],

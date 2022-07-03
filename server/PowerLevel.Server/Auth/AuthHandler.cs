@@ -106,7 +106,7 @@ public class AuthHandler
     {
         var now = this.dateTimeService.EventTime();
 
-        var expirationDate = session.ExpirationDate ?? now.AddYears(1000);
+        var expirationDate = session.ExpirationDate ?? now.AddDays(30);
 
         var jwtPayload = new JwtPayload
         {
@@ -200,7 +200,7 @@ public class AuthServiceImpl : AuthService
             LoginDate = this.dateTimeService.EventTime(),
             LoginID = loginID,
             ProfileID = userProfileID,
-            ExpirationDate = rememberMe ? this.dateTimeService.EventTime().AddDays(30) : this.dateTimeService.EventTime().AddHours(3),
+            ExpirationDate = rememberMe ? null : this.dateTimeService.EventTime().AddHours(3),
             CsrfToken = this.rngService.GenerateSecureString(40),
         };
 
