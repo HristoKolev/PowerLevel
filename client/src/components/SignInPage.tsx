@@ -16,7 +16,7 @@ import {
   BaseRpcClient,
   RpcClient,
   LoginRequest,
-  validations,
+  rpcValidations,
 } from '~rpc';
 import { CustomForm, CustomField } from '~infrastructure/CustomForm';
 
@@ -43,18 +43,21 @@ export const SignInPage = memo((): JSX.Element => {
 
   return (
     <div className={`flex justify-around ${signInPageClassName}`}>
-      <Paper elevation={12} className="form flex flex-col gap-4 mt-4 p-4">
-        <div className="title font-bold text-center">Sign in</div>
+      <CustomForm
+        validations={rpcValidations.loginRequest}
+        onSubmit={handleOnSubmit}
+      >
+        <Paper elevation={12} className="form flex flex-col gap-4 mt-4 p-4">
+          <div className="title font-bold text-center">Sign in</div>
 
-        <CustomForm onSubmit={handleOnSubmit}>
           <CustomField
             id="emailAddress"
-            validations={[validations.required('The email field is required.')]}
             render={(props) => (
               <TextField
                 label="Email Address"
                 className="w-full"
                 variant="filled"
+                inputProps={{ autoComplete: 'username' }}
                 {...props}
               />
             )}
@@ -62,15 +65,13 @@ export const SignInPage = memo((): JSX.Element => {
 
           <CustomField
             id="password"
-            validations={[
-              validations.required('The password field is required.'),
-            ]}
             render={(props) => (
               <TextField
                 label="Password"
                 type="password"
                 className="w-full"
                 variant="filled"
+                inputProps={{ autoComplete: 'current-password' }}
                 {...props}
               />
             )}
@@ -98,7 +99,7 @@ export const SignInPage = memo((): JSX.Element => {
           {serverResult && !serverResult.isOk && (
             <Alert severity="error">
               {serverResult.error.errorMessages.map((x) => (
-                <div>{x}</div>
+                <div key={x}>{x}</div>
               ))}
             </Alert>
           )}
@@ -106,8 +107,8 @@ export const SignInPage = memo((): JSX.Element => {
           <Button type="submit" variant="contained" className="w-full">
             Sign in
           </Button>
-        </CustomForm>
-      </Paper>
+        </Paper>
+      </CustomForm>
     </div>
   );
 });

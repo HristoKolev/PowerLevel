@@ -132,7 +132,7 @@ public class RegisterRequest
     public string EmailAddress { get; set; }
 
     [Required(ErrorMessage = "The password field is required.")]
-    [StringLength(40, MinimumLength = 10, ErrorMessage = "The password must be at least 10 and 40 characters long.")]
+    [StringLength(40, MinimumLength = 10, ErrorMessage = "The password must be between 10 and 40 characters long.")]
     public string Password { get; set; }
 }
 

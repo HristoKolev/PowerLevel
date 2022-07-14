@@ -20,5 +20,10 @@ public class Program
             Path.GetDirectoryName(typeof(Program).Assembly.Location)!,
             "../../../../../client/src/rpc/RpcClient.ts"
         ), TypeScriptCodeGenerator.Generate(engine.Metadata));
+
+        await File.WriteAllTextAsync(Path.Combine(
+            Path.GetDirectoryName(typeof(Program).Assembly.Location)!,
+            "../../../../../client/src/rpc/rpc-validations.ts"
+        ), TypeScriptCodeGenerator.GenerateValidations(engine.Metadata));
     }
 }

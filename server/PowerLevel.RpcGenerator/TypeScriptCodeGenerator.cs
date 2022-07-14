@@ -2,6 +2,7 @@ namespace PowerLevel.RpcGenerator;
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
@@ -24,6 +25,106 @@ import { BaseRpcClient, ApiResult } from './BaseRpcClient';
         string resultClient = GenerateResultClient(metadata);
 
         return fileHeader + interfaces + resultClient;
+    }
+
+    public static string GenerateValidations(List<RpcRequestMetadata> metadata)
+    {
+        var types = metadata.Select(x => x.RequestType)
+            .Where(x => x != null)
+            .ToList();
+
+        types = ResolveNestedDtoTypes(types);
+
+        var models = new List<ValidationTypeModel>();
+
+        foreach (var type in types)
+        {
+            var typeModel = new ValidationTypeModel
+            {
+                Name = type.Name,
+                Properties = new List<ValidationPropertyModel>(),
+            };
+
+            var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(x => x.SetMethod != null).ToList();
+
+            foreach (var prop in props)
+            {
+                var propModel = new ValidationPropertyModel
+                {
+                    Name = prop.Name,
+                };
+
+                var validationAttributes = prop.GetCustomAttributes().Where(x => x is ValidationAttribute).ToList();
+
+                if (validationAttributes.Any())
+                {
+                    var values = validationAttributes.Where(x => ScriptValidation(x) != null).Select(x => "validations." + ScriptValidation(x)).ToList();
+
+                    propModel.Validations = $"[ {string.Join(", ", values)} ]";
+                }
+                else
+                {
+                    propModel.Validations = "[]";
+                }
+
+                typeModel.Properties.Add(propModel);
+            }
+
+            models.Add(typeModel);
+        }
+
+        string scripted = string.Join("",
+            models.Select(x => $"  {JsonNamingPolicy.CamelCase.ConvertName(x.Name)}: {ScriptValidationTypeModel(x.Properties)},\n"));
+
+        string implementation = @$"// eslint-disable-next-line eslint-comments/disable-enable-pair
+/* eslint-disable prettier/prettier */
+import {{ validations }} from './validations';
+
+export const rpcValidations = {{
+{scripted}}};
+";
+
+        return implementation;
+    }
+
+    private static string ScriptValidation(Attribute validationAttribute)
+    {
+        if (validationAttribute is RequiredAttribute required)
+        {
+            return $"required('{required.ErrorMessage}')";
+        }
+
+        if (validationAttribute is MaxLengthAttribute maxLength)
+        {
+            return $"maxLength({maxLength.Length}, '{maxLength.ErrorMessage}')";
+        }
+
+        if (validationAttribute is MinLengthAttribute minLength)
+        {
+            return $"minLength({minLength.Length}, '{minLength.ErrorMessage}')";
+        }
+
+        if (validationAttribute is StringLengthAttribute stringLength)
+        {
+            return $"stringLength({stringLength.MinimumLength}, {stringLength.MaximumLength}, '{stringLength.ErrorMessage}')";
+        }
+
+        if (validationAttribute is RegularExpressionAttribute regularExpression)
+        {
+            return $"regex(/{regularExpression.Pattern}/g, '{regularExpression.ErrorMessage}')";
+        }
+
+        if (validationAttribute is EmailAttribute email)
+        {
+            return $"email('{email.ErrorMessage}')";
+        }
+
+        throw new ApplicationException($"No validations defined for type {validationAttribute.GetType().Name}.");
+    }
+
+    private static string ScriptValidationTypeModel(List<ValidationPropertyModel> items)
+    {
+        return "{" + string.Join("", items.Select(p => $"\n    {JsonNamingPolicy.CamelCase.ConvertName(p.Name)}: {p.Validations},")) + "\n  }";
     }
 
     private static Type GetResultErrorType(Type methodReturnType)
@@ -337,4 +438,18 @@ import { BaseRpcClient, ApiResult } from './BaseRpcClient';
 
         return string.Join("\n\n", ResolveNestedDtoTypes(types).Select(GetTypeScriptDefinition).Where(x => x != null)) + "\n\n";
     }
+}
+
+public class ValidationTypeModel
+{
+    public string Name { get; set; }
+
+    public List<ValidationPropertyModel> Properties { get; set; }
+}
+
+public class ValidationPropertyModel
+{
+    public string Name { get; set; }
+
+    public string Validations { get; set; }
 }

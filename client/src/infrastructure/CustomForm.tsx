@@ -9,6 +9,7 @@ import {
   SetStateAction,
   FormEvent,
   useCallback,
+  CSSProperties,
 } from 'react';
 
 export interface CustomFormState {
@@ -17,6 +18,7 @@ export interface CustomFormState {
   values: Record<string, string | boolean>;
   valid: boolean;
   touched: boolean;
+  validations: Record<string, ((x: unknown) => string[])[]>;
 }
 
 interface Field {
@@ -41,6 +43,7 @@ const defaultFormState: CustomFormState = {
   values: {},
   valid: true,
   touched: false,
+  validations: {},
 };
 
 const CustomFormContext = createContext<
@@ -56,56 +59,70 @@ interface CustomFormProps {
   children: ReactNode;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSubmit: (formValues: any) => void | Promise<void>;
+
+  validations?: Record<string, ((x: unknown) => string[])[]>;
+
+  className?: string | undefined;
+
+  style?: CSSProperties | undefined;
 }
 
-export const CustomForm = memo(({ children, onSubmit }: CustomFormProps) => {
-  const contextValue = useState(defaultFormState);
+export const CustomForm = memo(
+  ({ children, onSubmit, validations, className, style }: CustomFormProps) => {
+    const contextValue = useState(() => ({
+      ...defaultFormState,
+      validations: validations || {},
+    }));
 
-  const handleOnSubmit = useCallback(
-    (ev: FormEvent<HTMLFormElement>) => {
-      ev.preventDefault();
+    const handleOnSubmit = useCallback(
+      (ev: FormEvent<HTMLFormElement>) => {
+        ev.preventDefault();
 
-      const [formState, setFormState] = contextValue;
+        const [formState, setFormState] = contextValue;
 
-      if (
-        formState.fields.filter((x) => x.touched).length !==
-        formState.fields.length
-      ) {
-        setFormState((prevState) => {
-          const newFields = prevState.fields.map((y) => {
-            if (y.touched) {
-              return y;
-            }
+        if (
+          formState.fields.filter((x) => x.touched).length !==
+          formState.fields.length
+        ) {
+          setFormState((prevState) => {
+            const newFields = prevState.fields.map((y) => {
+              if (y.touched) {
+                return y;
+              }
+
+              return {
+                ...y,
+                touched: true,
+              };
+            });
 
             return {
-              ...y,
+              ...prevState,
+              fields: newFields,
+              fieldsById: Object.fromEntries(newFields.map((y) => [y.id, y])),
               touched: true,
             };
           });
+        }
 
-          return {
-            ...prevState,
-            fields: newFields,
-            fieldsById: Object.fromEntries(newFields.map((y) => [y.id, y])),
-          };
-        });
-      }
+        if (!formState.valid) {
+          return;
+        }
 
-      if (!formState.valid) {
-        return;
-      }
+        void onSubmit(formState.values);
+      },
+      [onSubmit, contextValue]
+    );
 
-      void onSubmit(formState.values);
-    },
-    [onSubmit, contextValue]
-  );
-
-  return (
-    <CustomFormContext.Provider value={contextValue}>
-      <form onSubmit={handleOnSubmit}>{children}</form>
-    </CustomFormContext.Provider>
-  );
-});
+    return (
+      <CustomFormContext.Provider value={contextValue}>
+        <form style={style} className={className} onSubmit={handleOnSubmit}>
+          {children}
+        </form>
+      </CustomFormContext.Provider>
+    );
+  }
+);
 
 const fieldsEqual = (x: Field, y: Field): boolean =>
   x.touched === y.touched &&
@@ -130,6 +147,7 @@ const updateField = (
       values: Object.fromEntries(
         newFields.map((x) => [x.id, x.value])
       ) as Record<string, string | boolean>,
+      validations: formState.validations,
     };
   }
   if (fieldsEqual(oldField, newField)) {
@@ -148,6 +166,7 @@ const updateField = (
       values: Object.fromEntries(
         newFields.map((x) => [x.id, x.value])
       ) as Record<string, string | boolean>,
+      validations: formState.validations,
     };
   }
 };
@@ -177,9 +196,9 @@ export const CustomField = memo(
         ...defaultField,
         id,
         name: id,
-        errorMessages: (validations || []).flatMap((x) =>
-          x(defaultField.value)
-        ),
+        errorMessages: (validations || [])
+          .concat(formState.validations[id] || [])
+          .flatMap((x) => x(defaultField.value)),
       };
       setTimeout(() => {
         setFormState((oldState) => updateField(oldState, field));
@@ -195,12 +214,14 @@ export const CustomField = memo(
           updateField(oldState, {
             ...field,
             value: newValue,
-            errorMessages: (validations || []).flatMap((x) => x(newValue)),
+            errorMessages: (validations || [])
+              .concat(formState.validations[field.id] || [])
+              .flatMap((x) => x(newValue)),
             touched: true,
           })
         );
       },
-      [field, setFormState, validations]
+      [field, formState.validations, setFormState, validations]
     );
 
     const handleOnBlur = useCallback(() => {

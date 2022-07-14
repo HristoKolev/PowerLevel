@@ -22,7 +22,7 @@ public class HttpServerApp : IAsyncDisposable
     private TaskCompletionSource<object> shutdownTriggered;
     private ManualResetEventSlim shutdownCompleted;
 
-    public static readonly RpcEngineOptions RpcEngineOptions = new RpcEngineOptions
+    public static readonly RpcEngineOptions RpcEngineOptions = new()
     {
         PotentialHandlerTypes = typeof(HttpServerApp).Assembly.GetTypes(),
         MiddlewareTypes = new[]
