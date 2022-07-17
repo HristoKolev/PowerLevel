@@ -1,13 +1,14 @@
-import { memo, useState, useCallback } from 'react';
+import { memo, useState, useCallback, useMemo } from 'react';
 import { css } from '@linaria/core';
 import {
   Button,
   Paper,
   TextField,
+  Alert,
   Switch,
   FormControlLabel,
-  Alert,
 } from '@mui/material';
+import { useForm } from 'react-hook-form';
 
 import {
   ApiResult,
@@ -18,7 +19,6 @@ import {
   LoginRequest,
   rpcValidations,
 } from '~rpc';
-import { CustomForm, CustomField } from '~infrastructure/CustomForm';
 
 const signInPageClassName = css`
   .form {
@@ -30,70 +30,66 @@ const signInPageClassName = css`
   }
 `;
 
+const validations = rpcValidations.loginRequest;
+
 export const SignInPage = memo((): JSX.Element => {
   const [serverResult, setServerResult] = useState<
     ApiResult<LoginResponse, LoginError> | undefined
   >();
 
-  const handleOnSubmit = useCallback(async (formValues: LoginRequest) => {
+  const onSubmit = useCallback(async (formValues: LoginRequest) => {
     const rpcClient = new RpcClient(new BaseRpcClient());
     const result = await rpcClient.loginResult(formValues);
     setServerResult(result);
   }, []);
 
+  const { register, handleSubmit, formState } = useForm<LoginRequest>({
+    mode: 'onTouched',
+  });
+
+  const handleOnSubmit = useMemo(
+    () => handleSubmit(onSubmit),
+    [onSubmit, handleSubmit]
+  );
+
   return (
     <div className={`flex justify-around ${signInPageClassName}`}>
-      <CustomForm
-        validations={rpcValidations.loginRequest}
-        onSubmit={handleOnSubmit}
-      >
+      {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
+      <form onSubmit={handleOnSubmit}>
         <Paper elevation={12} className="form flex flex-col gap-4 mt-4 p-4">
           <div className="title font-bold text-center">Sign in</div>
 
-          <CustomField
+          <TextField
+            label="Email Address"
             id="emailAddress"
-            render={(props) => (
-              <TextField
-                label="Email Address"
-                className="w-full"
-                variant="filled"
-                inputProps={{ autoComplete: 'username' }}
-                {...props}
-              />
-            )}
+            className="w-full"
+            variant="filled"
+            inputProps={{ autoComplete: 'username' }}
+            error={Boolean(formState.errors.emailAddress)}
+            helperText={formState.errors.emailAddress?.message || undefined}
+            {...register('emailAddress', validations.emailAddress)}
           />
 
-          <CustomField
-            id="password"
-            render={(props) => (
-              <TextField
-                label="Password"
-                type="password"
-                className="w-full"
-                variant="filled"
-                inputProps={{ autoComplete: 'current-password' }}
-                {...props}
-              />
-            )}
+          <TextField
+            label="Password"
+            type="password"
+            className="w-full"
+            variant="filled"
+            inputProps={{ autoComplete: 'current-password' }}
+            error={Boolean(formState.errors.password)}
+            helperText={formState.errors.password?.message || undefined}
+            {...register('password', validations.password)}
           />
 
-          <CustomField
-            id="rememberMe"
-            render={(props) => (
-              <FormControlLabel
-                htmlFor={props.id}
-                label="Remember me"
-                control={
-                  <Switch
-                    id={props.id}
-                    name={props.name}
-                    value={props.value}
-                    onChange={props.onChange}
-                  />
-                }
-                onBlur={props.onBlur}
+          <FormControlLabel
+            htmlFor="rememberMe"
+            label="Remember me"
+            control={
+              <Switch
+                id="rememberMe"
+                {...register('rememberMe', validations.rememberMe)}
               />
-            )}
+            }
           />
 
           {serverResult && !serverResult.isOk && (
@@ -108,7 +104,7 @@ export const SignInPage = memo((): JSX.Element => {
             Sign in
           </Button>
         </Paper>
-      </CustomForm>
+      </form>
     </div>
   );
 });

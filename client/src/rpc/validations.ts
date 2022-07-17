@@ -2,20 +2,35 @@ const emailRegex =
   /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/i;
 
 export const validations = {
-  required:
-    (message: string) =>
-    (value: unknown): string[] =>
-      value || value === 0 ? [] : [message],
-  email:
-    (message: string) =>
-    (value: unknown): string[] => {
-      const stringValue = String(value || '');
-      return !value || emailRegex.test(stringValue) ? [] : [message];
+  required: (message: string) => ({
+    required: {
+      value: true,
+      message,
     },
-  stringLength:
-    (min: number, max: number, message: string) =>
-    (value: unknown): string[] => {
-      const length = String(value || '').length;
-      return length < min || length > max ? [message] : [];
+  }),
+  email: (message: string) => ({
+    pattern: {
+      value: emailRegex,
+      message,
     },
+  }),
+  stringLength: (min: number, max: number, message: string) => [
+    {
+      minLength: {
+        value: min,
+        message,
+      },
+      maxLength: {
+        value: max,
+        message,
+      },
+    },
+  ],
 };
+
+export const mergeValidations = (all: unknown[]): Record<string, unknown> =>
+  all
+    .flat()
+    .reduce((x, y) =>
+      Object.assign(x as Record<string, unknown>, y as Record<string, unknown>)
+    ) as Record<string, unknown>;

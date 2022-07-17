@@ -15,16 +15,15 @@ public static class TypeScriptCodeGenerator
 {
     public static string Generate(List<RpcRequestMetadata> metadata)
     {
-        string fileHeader = @"// eslint-disable-next-line eslint-comments/disable-enable-pair
+        const string FILE_HEADER = @"// eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable prettier/prettier */
 import { BaseRpcClient, ApiResult } from './BaseRpcClient';
 
 ";
-
         string interfaces = GenerateInterfaces(metadata);
         string resultClient = GenerateResultClient(metadata);
 
-        return fileHeader + interfaces + resultClient;
+        return FILE_HEADER + interfaces + resultClient;
     }
 
     public static string GenerateValidations(List<RpcRequestMetadata> metadata)
@@ -60,11 +59,11 @@ import { BaseRpcClient, ApiResult } from './BaseRpcClient';
                 {
                     var values = validationAttributes.Where(x => ScriptValidation(x) != null).Select(x => "validations." + ScriptValidation(x)).ToList();
 
-                    propModel.Validations = $"[ {string.Join(", ", values)} ]";
+                    propModel.Validations = $"mergeValidations([ {string.Join(", ", values)} ])";
                 }
                 else
                 {
-                    propModel.Validations = "[]";
+                    propModel.Validations = "{}";
                 }
 
                 typeModel.Properties.Add(propModel);
@@ -78,7 +77,7 @@ import { BaseRpcClient, ApiResult } from './BaseRpcClient';
 
         string implementation = @$"// eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable prettier/prettier */
-import {{ validations }} from './validations';
+import {{ validations, mergeValidations }} from './validations';
 
 export const rpcValidations = {{
 {scripted}}};
