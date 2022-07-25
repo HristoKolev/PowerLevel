@@ -6,6 +6,7 @@ export interface LoginRequest {
   emailAddress: string;
   password: string;
   rememberMe: boolean;
+  recaptchaToken: string;
 }
 
 export interface ProfileInfoRequest {
@@ -15,6 +16,7 @@ export interface ProfileInfoRequest {
 export interface RegisterRequest {
   emailAddress: string;
   password: string;
+  recaptchaToken: string;
 }
 
 export interface LoginResponse {

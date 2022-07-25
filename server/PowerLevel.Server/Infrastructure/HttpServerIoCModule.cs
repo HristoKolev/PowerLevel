@@ -34,12 +34,14 @@ public class HttpServerIoCModule : Module
         builder.Register(this.CreateLogProcessor).InstancePerLifetimeScope();
         builder.RegisterType<AuthServiceImpl>().As<AuthService>().InstancePerLifetimeScope();
         builder.RegisterType<JwtServiceImpl>().As<JwtService>().InstancePerLifetimeScope();
+        builder.RegisterType<RecaptchaServiceImpl>().As<RecaptchaService>().InstancePerLifetimeScope();
         builder.RegisterType<PasswordServiceImpl>().As<PasswordService>().InstancePerLifetimeScope();
         builder.RegisterType<RpcRequestHandler>().InstancePerLifetimeScope();
         builder.RegisterType<LifetimeScopeInstanceProvider>().As<InstanceProvider>().InstancePerLifetimeScope();
         builder.RegisterType<AuthenticationFilter>().InstancePerLifetimeScope();
         builder.RegisterType<HttpRequestState>().InstancePerLifetimeScope();
         builder.RegisterType<RpcAuthorizationMiddleware>().InstancePerLifetimeScope();
+        builder.RegisterType<RpcConstantTimeMiddleware>().InstancePerLifetimeScope();
         builder.RegisterType<RpcInputValidationMiddleware>().InstancePerLifetimeScope();
         builder.RegisterType<DateTimeServiceImpl>().As<DateTimeService>().InstancePerLifetimeScope();
         builder.RegisterType<RngServiceImpl>().As<RngService>().InstancePerLifetimeScope();

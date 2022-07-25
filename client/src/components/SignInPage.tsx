@@ -9,6 +9,7 @@ import {
   FormControlLabel,
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 
 import {
   ApiResult,
@@ -19,10 +20,17 @@ import {
   LoginRequest,
   rpcValidations,
 } from '~rpc';
+import { RecaptchaField } from '~infrastructure/RecaptchaField';
+import { breakpoints } from '~infrastructure/breakpoints';
+import { LoadingIndicator } from '~infrastructure/LoadingIndicator';
 
 const signInPageClassName = css`
-  .form {
-    width: 400px;
+  form {
+    width: 336px;
+
+    @media (min-width: ${breakpoints.tablet}px) {
+      width: 400px;
+    }
   }
 
   .title {
@@ -33,17 +41,31 @@ const signInPageClassName = css`
 const validations = rpcValidations.loginRequest;
 
 export const SignInPage = memo((): JSX.Element => {
+  const navigate = useNavigate();
+
   const [serverResult, setServerResult] = useState<
     ApiResult<LoginResponse, LoginError> | undefined
   >();
 
-  const onSubmit = useCallback(async (formValues: LoginRequest) => {
-    const rpcClient = new RpcClient(new BaseRpcClient());
-    const result = await rpcClient.loginResult(formValues);
-    setServerResult(result);
-  }, []);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
-  const { register, handleSubmit, formState } = useForm<LoginRequest>({
+  const onSubmit = useCallback(
+    async (formValues: LoginRequest) => {
+      setSubmitLoading(true);
+
+      const rpcClient = new RpcClient(new BaseRpcClient());
+
+      const result = await rpcClient.loginResult(formValues);
+
+      setSubmitLoading(false);
+      setServerResult(result);
+
+      navigate('/');
+    },
+    [navigate]
+  );
+
+  const { register, handleSubmit, control, formState } = useForm<LoginRequest>({
     mode: 'onTouched',
   });
 
@@ -91,6 +113,14 @@ export const SignInPage = memo((): JSX.Element => {
               />
             }
           />
+
+          <RecaptchaField
+            className="flex justify-center"
+            control={control}
+            name="recaptchaToken"
+          />
+
+          {submitLoading && <LoadingIndicator message="Logging in..." />}
 
           {serverResult && !serverResult.isOk && (
             <Alert severity="error">

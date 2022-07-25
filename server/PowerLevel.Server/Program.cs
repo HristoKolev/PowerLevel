@@ -27,6 +27,7 @@ public class HttpServerApp : IAsyncDisposable
         PotentialHandlerTypes = typeof(HttpServerApp).Assembly.GetTypes(),
         MiddlewareTypes = new[]
         {
+            typeof(RpcConstantTimeMiddleware),
             typeof(RpcAuthorizationMiddleware),
             typeof(RpcInputValidationMiddleware),
         },

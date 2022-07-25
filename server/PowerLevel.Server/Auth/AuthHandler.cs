@@ -15,6 +15,8 @@ public class AuthHandler
     private readonly AuthService authService;
     private readonly JwtService jwtService;
     private readonly DateTimeService dateTimeService;
+    private readonly RecaptchaService recaptchaService;
+    private readonly HttpServerAppConfig appConfig;
     private readonly HttpRequestState httpRequestState;
 
     public AuthHandler(
@@ -23,6 +25,8 @@ public class AuthHandler
         AuthService authService,
         JwtService jwtService,
         DateTimeService dateTimeService,
+        RecaptchaService recaptchaService,
+        HttpServerAppConfig appConfig,
         HttpRequestState httpRequestState)
     {
         this.db = db;
@@ -30,12 +34,20 @@ public class AuthHandler
         this.authService = authService;
         this.jwtService = jwtService;
         this.dateTimeService = dateTimeService;
+        this.recaptchaService = recaptchaService;
+        this.appConfig = appConfig;
         this.httpRequestState = httpRequestState;
     }
 
     [RpcBind(typeof(RegisterRequest), typeof(RegisterResponse))]
+    [RpcConstantTime(3000)]
     public async Task<ApiResult<RegisterResponse>> Register(RegisterRequest req)
     {
+        if (!await this.recaptchaService.Verify(req.RecaptchaToken))
+        {
+            return "Invalid Recaptcha token.";
+        }
+
         req.EmailAddress = req.EmailAddress.Trim().ToLower();
         req.Password = req.Password.Trim();
 
@@ -57,8 +69,14 @@ public class AuthHandler
     }
 
     [RpcBind(typeof(LoginRequest), typeof(LoginResponse))]
+    [RpcConstantTime(3000)]
     public async Task<LoginApiResult> Login(LoginRequest req)
     {
+        if (!await this.recaptchaService.Verify(req.RecaptchaToken))
+        {
+            return LoginApiResult.Fail("Invalid Recaptcha token.");
+        }
+
         req.EmailAddress = req.EmailAddress.Trim().ToLower();
         req.Password = req.Password.Trim();
 
@@ -119,7 +137,9 @@ public class AuthHandler
 
         string jwt = this.jwtService.EncodeSession(jwtPayload);
 
-        string cookie = $"jwt={jwt}; Expires={expirationDate:R}; Path=/; Secure; HttpOnly";
+        string secure = this.appConfig.Environment is "development" or "testing" ? "" : "Secure;";
+
+        string cookie = $"jwt={jwt}; Expires={expirationDate:R}; Path=/; SameSite=Strict; {secure} HttpOnly;";
 
         return cookie;
     }
@@ -134,6 +154,8 @@ public class RegisterRequest
     [Required(ErrorMessage = "The password field is required.")]
     [StringLength(40, MinimumLength = 10, ErrorMessage = "The password must be between 10 and 40 characters long.")]
     public string Password { get; set; }
+
+    public string RecaptchaToken { get; set; }
 }
 
 public class RegisterResponse { }
@@ -147,6 +169,8 @@ public class LoginRequest
     public string Password { get; set; }
 
     public bool RememberMe { get; set; }
+
+    public string RecaptchaToken { get; set; }
 }
 
 public class LoginResponse

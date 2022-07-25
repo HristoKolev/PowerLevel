@@ -44,6 +44,7 @@ public class RpcRequestHandler
         try
         {
             httpRequestState.HttpContext.Response.StatusCode = 200;
+            httpRequestState.HttpContext.Response.Headers.ContentType = "application/json";
             await JsonHelper.Serialize(httpRequestState.HttpContext.Response.Body, result);
         }
         catch (Exception err)
@@ -118,6 +119,22 @@ public class RpcRequestHandler
     }
 }
 
+public class RpcInputValidationMiddleware : RpcMiddleware
+{
+    public async Task Run(RpcContext context, InstanceProvider instanceProvider, RpcRequestDelegate next)
+    {
+        var validationResult = InputValidator.Validate(context.RequestMessage.Payload);
+
+        if (!validationResult.IsOk)
+        {
+            context.SetResponse(ApiResult.Fail(validationResult.Error).ToGeneralForm());
+            return;
+        }
+
+        await next(context, instanceProvider);
+    }
+}
+
 public class RpcAuthorizationMiddleware : RpcMiddleware
 {
     public const string UNAUTHORIZED_ACCESS_MESSAGE = "Unauthorized access.";
@@ -154,25 +171,36 @@ public class RpcAuthorizationMiddleware : RpcMiddleware
     }
 }
 
-public class RpcInputValidationMiddleware : RpcMiddleware
-{
-    public async Task Run(RpcContext context, InstanceProvider instanceProvider, RpcRequestDelegate next)
-    {
-        var validationResult = InputValidator.Validate(context.RequestMessage.Payload);
-
-        if (!validationResult.IsOk)
-        {
-            context.SetResponse(ApiResult.Fail(validationResult.Error).ToGeneralForm());
-            return;
-        }
-
-        await next(context, instanceProvider);
-    }
-}
-
 public class RpcAuthAttribute : RpcSupplementalAttribute
 {
     public bool RequiresAuthentication { get; set; }
+}
+
+public class RpcConstantTimeMiddleware : RpcMiddleware
+{
+    public async Task Run(RpcContext context, InstanceProvider instanceProvider, RpcRequestDelegate next)
+    {
+        var nextTask = next(context, instanceProvider);
+
+        var constantTimeAttribute = context.GetSupplementalAttribute<RpcConstantTimeAttribute>();
+
+        if (constantTimeAttribute != null)
+        {
+            await Task.Delay(constantTimeAttribute.Delay);
+        }
+
+        await nextTask;
+    }
+}
+
+public class RpcConstantTimeAttribute : RpcSupplementalAttribute
+{
+    public int Delay { get; }
+
+    public RpcConstantTimeAttribute(int delay)
+    {
+        this.Delay = delay;
+    }
 }
 
 public class HttpRequestState : IDisposable

@@ -48,6 +48,7 @@
     }
   },
   "rules": {
+    "import/no-named-as-default": "off",
     "object-shorthand": 2,
     "eqeqeq": "error",
     "jest/no-conditional-expect": ["off"],

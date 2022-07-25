@@ -17,6 +17,8 @@ public class HttpServerAppConfig
     /// </summary>
     public string SessionCertificate { get; set; }
 
+    public string RecaptchaSecret { get; set; }
+
     public HttpServerAppLoggingConfig Logging { get; set; }
 }
 
