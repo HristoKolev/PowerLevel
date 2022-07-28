@@ -5,5 +5,16 @@
     ["@babel/preset-react", { "runtime": "automatic" }],
     "@linaria"
   ],
-  "plugins": ["@babel/plugin-transform-runtime"]
+  "plugins": [
+    "@babel/plugin-transform-runtime",
+    [
+      "module-resolver",
+      {
+        "root": ["./src"],
+        "alias": {
+          "^~(.*)": "./src/\\1"
+        }
+      }
+    ]
+  ]
 }

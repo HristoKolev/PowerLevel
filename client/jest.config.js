@@ -12,7 +12,4 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/setupTests.js'],
   testEnvironment: 'jsdom',
   testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)'],
-  moduleNameMapper: {
-    '^~(.*)$': '<rootDir>/src/$1',
-  },
 };
