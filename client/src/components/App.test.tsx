@@ -20,7 +20,7 @@ describe('<App />', () => {
     jest.resetModules();
   });
 
-  test('renders correctly', async () => {
+  test('renders without error', async () => {
     const store = createStore();
 
     render(<App store={store} />);
