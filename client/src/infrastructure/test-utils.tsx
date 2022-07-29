@@ -97,3 +97,83 @@ export class ResizeObserverMock {
     this.unobserveMock.call(this, target);
   }
 }
+
+export class InMemoryStorage implements Storage {
+  private readonly backingObject: Record<string, string | null>;
+
+  throwOnAccess = false;
+
+  constructor(backingObject?: Record<string, string | null>) {
+    this.backingObject = backingObject || {};
+  }
+
+  get(key: string): string | null {
+    if (this.throwOnAccess) {
+      throw new Error('InMemoryStorage access error.');
+    }
+
+    return this.backingObject[key];
+  }
+
+  set(key: string, value: string | null) {
+    if (this.throwOnAccess) {
+      throw new Error('InMemoryStorage access error.');
+    }
+
+    this.backingObject[key] = value;
+  }
+
+  get length(): number {
+    if (this.throwOnAccess) {
+      throw new Error('InMemoryStorage access error.');
+    }
+
+    return Object.keys(this.backingObject).length;
+  }
+
+  clear(): void {
+    if (this.throwOnAccess) {
+      throw new Error('InMemoryStorage access error.');
+    }
+
+    for (const key of Reflect.ownKeys(this.backingObject)) {
+      delete this.backingObject[key as string];
+    }
+  }
+
+  getItem(key: string): string | null {
+    if (this.throwOnAccess) {
+      throw new Error('InMemoryStorage access error.');
+    }
+
+    return this.backingObject[key];
+  }
+
+  key(index: number): string | null {
+    if (this.throwOnAccess) {
+      throw new Error('InMemoryStorage access error.');
+    }
+
+    return (
+      Object.keys(this.backingObject)
+        .sort((x, y) => x.localeCompare(y))
+        .find((_, i) => i === index) || null
+    );
+  }
+
+  removeItem(key: string): void {
+    if (this.throwOnAccess) {
+      throw new Error('InMemoryStorage access error.');
+    }
+
+    delete this.backingObject[key];
+  }
+
+  setItem(key: string, value: string): void {
+    if (this.throwOnAccess) {
+      throw new Error('InMemoryStorage access error.');
+    }
+
+    this.backingObject[key] = value;
+  }
+}

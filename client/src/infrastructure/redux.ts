@@ -4,8 +4,10 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { globalSlice } from '~components/globalSlice';
 import { layoutSlice } from '~layout';
 
-export const createStore = () =>
+export const createStore = (preloadedState?: unknown) =>
   configureStore({
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-explicit-any
+    preloadedState: preloadedState as any,
     reducer: {
       [globalSlice.name]: globalSlice.reducer,
       [layoutSlice.name]: layoutSlice.reducer,

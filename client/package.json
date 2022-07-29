@@ -27,7 +27,8 @@
     "react-google-recaptcha": "^2",
     "react-hook-form": "^7",
     "react-redux": "^8",
-    "react-router-dom": "^6"
+    "react-router-dom": "^6",
+    "redux": "^4"
   },
   "devDependencies": {
     "@babel/core": "^7",
