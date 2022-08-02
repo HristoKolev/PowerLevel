@@ -199,8 +199,6 @@ FakesAssemblies/
 
 **/project.lock.json
 
-.idea/
-
 .awcache/
 **/compiled/
 dist/
@@ -209,3 +207,13 @@ dll/
 *\.received\.json
 
 projectfiles.tar
+
+client/.idea/client.iml
+
+client/.idea/jsLibraryMappings.xml
+
+client/.idea/modules.xml
+
+server/.idea/.idea.PowerLevel/.idea/indexLayout.xml
+
+server/.idea/.idea.PowerLevel/.idea/projectSettingsUpdater.xml
