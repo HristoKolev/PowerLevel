@@ -26,6 +26,8 @@ public class HttpServerAppTest : AppDatabaseTest
 
     protected const string TEST_PASSWORD = "password123";
 
+    protected const string TEST_RECAPTCHA_TOKEN = "TEST_RECAPTCHA_TOKEN";
+
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
@@ -50,6 +52,7 @@ public class HttpServerAppTest : AppDatabaseTest
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
+            RecaptchaToken = TEST_RECAPTCHA_TOKEN,
         });
 
         if (!registerResult.IsOk)
@@ -61,6 +64,7 @@ public class HttpServerAppTest : AppDatabaseTest
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
+            RecaptchaToken = TEST_RECAPTCHA_TOKEN,
         });
 
         if (!loginResult.IsOk)
@@ -221,7 +225,7 @@ public class TestRpcClient : RpcClient
 
         foreach (string cookieHeaderValue in setCookieHeaderValues)
         {
-            var cookieParts = cookieHeaderValue.Split(';').Select(x => x.Trim()).ToList();
+            var cookieParts = cookieHeaderValue.Split(';').Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
 
             if (cookieParts.Count == 0)
             {
@@ -299,6 +303,19 @@ public class PasswordServiceMock : PasswordService
 
     public bool VerifyPassword(string password, string passwordHash)
     {
+        if (password == null || passwordHash == null)
+        {
+            return false;
+        }
+
         return passwordHash.Remove(passwordHash.Length - 2, 2).Remove(0, 2) == password;
+    }
+}
+
+public class RecaptchaServiceMock : RecaptchaService
+{
+    public Task<bool> Verify(string token)
+    {
+        return Task.FromResult(token == "TEST_RECAPTCHA_TOKEN");
     }
 }

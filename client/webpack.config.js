@@ -5,7 +5,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
-const StylelintPlugin = require('stylelint-webpack-plugin');
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
 const FaviconsWebpackFixerPlugin = require('./FaviconsWebpackFixerPlugin');
@@ -126,9 +125,6 @@ module.exports = {
     }),
     new ESLintPlugin({
       extensions: ['js', 'jsx', 'ts', 'tsx'],
-      failOnWarning: true,
-    }),
-    new StylelintPlugin({
       failOnWarning: true,
     }),
     new ForkTsCheckerWebpackPlugin({

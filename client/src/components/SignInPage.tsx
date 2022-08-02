@@ -1,4 +1,10 @@
-import { memo, useState, useCallback, useMemo } from 'react';
+import {
+  memo,
+  useState,
+  useCallback,
+  useMemo,
+  InputHTMLAttributes,
+} from 'react';
 import { css } from '@linaria/core';
 import {
   Button,
@@ -15,14 +21,14 @@ import {
   ApiResult,
   LoginResponse,
   LoginError,
-  BaseRpcClient,
-  RpcClient,
   LoginRequest,
   rpcValidations,
 } from '~rpc';
 import { RecaptchaField } from '~infrastructure/RecaptchaField';
-import { breakpoints } from '~infrastructure/breakpoints';
+import { breakpoints } from '~infrastructure/helpers';
 import { LoadingIndicator } from '~infrastructure/LoadingIndicator';
+import { sessionActions } from '~infrastructure/sessionSlice';
+import { useAppDispatch, createRpcClient } from '~infrastructure/redux';
 
 const signInPageClassName = css`
   form {
@@ -41,6 +47,7 @@ const signInPageClassName = css`
 const validations = rpcValidations.loginRequest;
 
 export const SignInPage = memo((): JSX.Element => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const [serverResult, setServerResult] = useState<
@@ -52,15 +59,21 @@ export const SignInPage = memo((): JSX.Element => {
   const onSubmit = useCallback(
     async (formValues: LoginRequest) => {
       setSubmitLoading(true);
+      setServerResult(undefined);
 
-      const rpcClient = new RpcClient(new BaseRpcClient());
+      const rpcClient = createRpcClient();
 
-      setServerResult(await rpcClient.loginResult(formValues));
+      const result = await rpcClient.loginResult(formValues);
+
+      setServerResult(result);
       setSubmitLoading(false);
 
-      navigate('/');
+      if (result.isOk) {
+        dispatch(sessionActions.login({ loginResponse: result.payload }));
+        navigate('/');
+      }
     },
-    [navigate]
+    [dispatch, navigate]
   );
 
   const { register, handleSubmit, control, formState } = useForm<LoginRequest>({
@@ -77,14 +90,18 @@ export const SignInPage = memo((): JSX.Element => {
       {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
       <form onSubmit={handleOnSubmit}>
         <Paper elevation={12} className="form flex flex-col gap-4 mt-4 p-4">
-          <div className="title font-bold text-center">Sign in</div>
+          <div className="title font-bold text-center" data-testid="form-title">
+            Sign in
+          </div>
 
           <TextField
             label="Email Address"
-            id="emailAddress"
             className="w-full"
             variant="filled"
-            inputProps={{ autoComplete: 'username' }}
+            inputProps={{
+              autoComplete: 'username',
+              'data-testid': 'emailAddress',
+            }}
             error={Boolean(formState.errors.emailAddress)}
             helperText={formState.errors.emailAddress?.message || undefined}
             {...register('emailAddress', validations.emailAddress)}
@@ -95,7 +112,10 @@ export const SignInPage = memo((): JSX.Element => {
             type="password"
             className="w-full"
             variant="filled"
-            inputProps={{ autoComplete: 'current-password' }}
+            inputProps={{
+              autoComplete: 'current-password',
+              'data-testid': 'password',
+            }}
             error={Boolean(formState.errors.password)}
             helperText={formState.errors.password?.message || undefined}
             {...register('password', validations.password)}
@@ -107,6 +127,11 @@ export const SignInPage = memo((): JSX.Element => {
             control={
               <Switch
                 id="rememberMe"
+                inputProps={
+                  {
+                    'data-testid': 'rememberMe',
+                  } as InputHTMLAttributes<HTMLInputElement>
+                }
                 {...register('rememberMe', validations.rememberMe)}
               />
             }
@@ -114,11 +139,14 @@ export const SignInPage = memo((): JSX.Element => {
 
           <RecaptchaField
             className="flex justify-center"
+            testid="recaptchaToken"
             control={control}
             name="recaptchaToken"
           />
 
-          {submitLoading && <LoadingIndicator message="Logging in..." />}
+          {submitLoading && (
+            <LoadingIndicator delay={0} message="Signing in..." />
+          )}
 
           {serverResult && !serverResult.isOk && (
             <Alert severity="error">
@@ -128,7 +156,13 @@ export const SignInPage = memo((): JSX.Element => {
             </Alert>
           )}
 
-          <Button type="submit" variant="contained" className="w-full">
+          <Button
+            type="submit"
+            variant="contained"
+            className="w-full"
+            data-testid="submit-button"
+            disabled={submitLoading}
+          >
             Sign in
           </Button>
         </Paper>

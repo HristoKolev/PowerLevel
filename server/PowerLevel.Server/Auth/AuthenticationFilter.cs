@@ -15,15 +15,18 @@ public class AuthenticationFilter
     private readonly JwtService jwtService;
     private readonly AuthService authService;
     private readonly DateTimeService dateTimeService;
+    private readonly PasswordService passwordService;
 
     public AuthenticationFilter(
         JwtService jwtService,
         AuthService authService,
-        DateTimeService dateTimeService)
+        DateTimeService dateTimeService,
+        PasswordService passwordService)
     {
         this.jwtService = jwtService;
         this.authService = authService;
         this.dateTimeService = dateTimeService;
+        this.passwordService = passwordService;
     }
 
     private static string GetHeaderValue(IDictionary<string, StringValues> headers, string key)
@@ -110,7 +113,12 @@ public class AuthenticationFilter
             return AuthResult.Anonymous; // non existent session
         }
 
-        if (userSession.ExpirationDate.HasValue && this.dateTimeService.EventTime() >= userSession.ExpirationDate.Value)
+        if (userSession.LoggedOut)
+        {
+            return AuthResult.Anonymous; // session that been logged out
+        }
+
+        if (this.dateTimeService.EventTime() >= userSession.ExpirationDate)
         {
             return AuthResult.Anonymous; // expired session
         }
@@ -122,7 +130,7 @@ public class AuthenticationFilter
             SessionID = userSession.SessionID,
             LoginID = userSession.LoginID,
             ProfileID = userSession.ProfileID,
-            ValidCsrfToken = userSession.CsrfToken == csrfToken,
+            ValidCsrfToken = this.passwordService.VerifyPassword(csrfToken, userSession.CsrfTokenHash),
         };
 
         return authResult;

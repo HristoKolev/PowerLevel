@@ -1,10 +1,14 @@
 import { memo, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { css } from '@linaria/core';
 import { IconButton, Toolbar, AppBar, Button } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 
 import { useAppDispatch, useAppSelector } from '~infrastructure/redux';
+import {
+  isLoggedInSelector,
+  sessionThunks,
+} from '~infrastructure/sessionSlice';
 
 import {
   layoutActions,
@@ -34,12 +38,20 @@ const customAppBarClassName = css`
 
 export const CustomAppBar = memo((): JSX.Element => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const isLoggedIn = useAppSelector(isLoggedInSelector);
 
   const { open, breakpoint } = useAppSelector(layoutSelector);
 
   const handleOnIconClick = useCallback(() => {
     dispatch(layoutActions.toggleDrawer());
   }, [dispatch]);
+
+  const handleOnLogoutClick = useCallback(async () => {
+    await dispatch(sessionThunks.logout());
+    navigate('/');
+  }, [dispatch, navigate]);
 
   return (
     <AppBar
@@ -67,9 +79,18 @@ export const CustomAppBar = memo((): JSX.Element => {
           </Link>
         </div>
 
-        <Link to="/sign-in" className="link">
-          <Button color="inherit">Sign in</Button>
-        </Link>
+        {!isLoggedIn && (
+          <Link to="/sign-in" className="link">
+            <Button color="inherit">Sign in</Button>
+          </Link>
+        )}
+
+        {isLoggedIn && (
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          <Button color="inherit" onClick={handleOnLogoutClick}>
+            Sign out
+          </Button>
+        )}
       </Toolbar>
     </AppBar>
   );

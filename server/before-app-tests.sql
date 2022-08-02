@@ -61,8 +61,10 @@ create table public.user_sessions (
     session_id serial,
 
     login_date timestamptz(0) not null,
-    expiration_date timestamptz(0),
-    csrf_token text not null,
+    expiration_date timestamptz(0) not null,
+    csrf_token_hash text not null,
+    logged_out boolean not null,
+    logout_date timestamptz(0),
 
     login_id int not null references user_logins,
     profile_id int not null references user_profiles,

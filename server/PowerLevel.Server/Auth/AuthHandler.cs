@@ -1,13 +1,13 @@
 namespace PowerLevel.Server.Auth;
 
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using Infrastructure;
 using LinqToDB;
 using Xdxd.DotNet.Rpc;
 using Xdxd.DotNet.Shared;
 
-[RpcAuth(RequiresAuthentication = false)]
 public class AuthHandler
 {
     private readonly IDbService db;
@@ -39,6 +39,7 @@ public class AuthHandler
         this.httpRequestState = httpRequestState;
     }
 
+    [RpcAuth(RequiresAuthentication = false)]
     [RpcBind(typeof(RegisterRequest), typeof(RegisterResponse))]
     [RpcConstantTime(3000)]
     public async Task<ApiResult<RegisterResponse>> Register(RegisterRequest req)
@@ -68,6 +69,7 @@ public class AuthHandler
         }
     }
 
+    [RpcAuth(RequiresAuthentication = false)]
     [RpcBind(typeof(LoginRequest), typeof(LoginResponse))]
     [RpcConstantTime(3000)]
     public async Task<LoginApiResult> Login(LoginRequest req)
@@ -101,13 +103,13 @@ public class AuthHandler
 
         await using (var tx = await this.db.BeginTransaction())
         {
-            var session = await this.authService.CreateSession(login.LoginID, profile!.UserProfileID, req.RememberMe);
+            var (csrfToken, session) = await this.authService.CreateSession(login.LoginID, profile!.UserProfileID, req.RememberMe);
 
             var response = new LoginResponse
             {
-                CsrfToken = session.CsrfToken,
                 EmailAddress = profile.EmailAddress,
                 UserProfileID = profile.UserProfileID,
+                CsrfToken = csrfToken,
             };
 
             string cookieHeader = this.FormatCookie(session);
@@ -120,30 +122,45 @@ public class AuthHandler
         }
     }
 
+    [RpcBind(typeof(LogoutRequest), typeof(LogoutResponse))]
+    public async Task<LogoutResponse> Logout(AuthResult authResult)
+    {
+        await using (var tx = await this.db.BeginTransaction())
+        {
+            await this.authService.Logout(authResult.SessionID);
+
+            await tx.CommitAsync();
+        }
+
+        return new LogoutResponse();
+    }
+
     private string FormatCookie(UserSessionPoco session)
     {
         var now = this.dateTimeService.EventTime();
-
-        var expirationDate = session.ExpirationDate ?? now.AddDays(30);
 
         var jwtPayload = new JwtPayload
         {
             SessionID = session.SessionID,
             JwtID = session.SessionID,
-            ExpirationTime = expirationDate.ToUnixEpochTime(),
+            ExpirationTime = session.ExpirationDate.ToUnixEpochTime(),
             IssuedAt = now.ToUnixEpochTime(),
             NotBefore = now.ToUnixEpochTime(),
         };
 
         string jwt = this.jwtService.EncodeSession(jwtPayload);
 
-        string secure = this.appConfig.Environment is "development" or "testing" ? "" : "Secure;";
+        string secure = this.appConfig.Environment is "development" or "testing" ? "" : "Secure; ";
 
-        string cookie = $"jwt={jwt}; Expires={expirationDate:R}; Path=/; SameSite=Strict; {secure} HttpOnly;";
+        string cookie = $"jwt={jwt}; Expires={session.ExpirationDate:R}; Path=/; SameSite=Strict; {secure}HttpOnly;";
 
         return cookie;
     }
 }
+
+public class LogoutRequest { }
+
+public class LogoutResponse { }
 
 public class RegisterRequest
 {
@@ -186,11 +203,13 @@ public interface AuthService
 {
     Task<UserLoginPoco> FindLogin(string emailAddress);
 
-    Task<UserSessionPoco> CreateSession(int loginID, int userProfileID, bool rememberMe);
+    Task<(string, UserSessionPoco)> CreateSession(int loginID, int userProfileID, bool rememberMe);
 
     Task<(UserProfilePoco, UserLoginPoco)> CreateProfile(string emailAddress, string password);
 
     Task<UserSessionPoco> GetSession(int sessionID);
+
+    Task Logout(int sessionID);
 }
 
 public class AuthServiceImpl : AuthService
@@ -217,20 +236,22 @@ public class AuthServiceImpl : AuthService
         return this.db.Poco.UserLogins.FirstOrDefaultAsync(x => x.EmailAddress == emailAddress);
     }
 
-    public async Task<UserSessionPoco> CreateSession(int loginID, int userProfileID, bool rememberMe)
+    public async Task<(string, UserSessionPoco)> CreateSession(int loginID, int userProfileID, bool rememberMe)
     {
+        string csrfToken = this.rngService.GenerateSecureString(40);
+
         var session = new UserSessionPoco
         {
             LoginDate = this.dateTimeService.EventTime(),
             LoginID = loginID,
             ProfileID = userProfileID,
-            ExpirationDate = rememberMe ? null : this.dateTimeService.EventTime().AddHours(3),
-            CsrfToken = this.rngService.GenerateSecureString(40),
+            ExpirationDate = rememberMe ? this.dateTimeService.EventTime().AddDays(30) : this.dateTimeService.EventTime().AddHours(3),
+            CsrfTokenHash = this.passwordService.HashPassword(csrfToken),
         };
 
         await this.db.Save(session);
 
-        return session;
+        return (csrfToken, session);
     }
 
     public async Task<(UserProfilePoco, UserLoginPoco)> CreateProfile(string emailAddress, string password)
@@ -261,6 +282,27 @@ public class AuthServiceImpl : AuthService
     public Task<UserSessionPoco> GetSession(int sessionID)
     {
         return this.db.Poco.UserSessions.FirstOrDefaultAsync(x => x.SessionID == sessionID);
+    }
+
+    public async Task Logout(int sessionID)
+    {
+        var session = await this.db.Poco.UserSessions.Where(x => x.SessionID == sessionID).FirstOrDefaultAsync();
+
+        if (session!.LoggedOut)
+        {
+            throw new DetailedException("Can't log out a session that is already logged out.")
+            {
+                Details =
+                {
+                    { "sessionID", sessionID },
+                },
+            };
+        }
+
+        session.LoggedOut = true;
+        session.LogoutDate = this.dateTimeService.EventTime();
+
+        await this.db.Save(session);
     }
 }
 

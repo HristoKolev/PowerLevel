@@ -3,6 +3,7 @@ namespace PowerLevel.Server.Tests;
 using System.Threading.Tasks;
 using Auth;
 using Autofac;
+using Infrastructure;
 using LinqToDB;
 using Xdxd.DotNet.Logging;
 using Xdxd.DotNet.Shared;
@@ -16,6 +17,7 @@ public class AuthHandlerRegisterReturnsErrorWhenTheUsernameIsTaken : HttpServerA
         builder.Register((_, _) => StubHelper.DateTimeServiceStub).InstancePerLifetimeScope();
         builder.RegisterType<RngServiceMock>().As<RngService>().InstancePerLifetimeScope();
         builder.RegisterType<PasswordServiceMock>().As<PasswordService>().InstancePerLifetimeScope();
+        builder.RegisterType<RecaptchaServiceMock>().As<RecaptchaService>().InstancePerLifetimeScope();
         builder.RegisterType<StructuredLogMock>().As<Log>().InstancePerLifetimeScope();
     }
 
@@ -29,6 +31,7 @@ public class AuthHandlerRegisterReturnsErrorWhenTheUsernameIsTaken : HttpServerA
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
+            RecaptchaToken = TEST_RECAPTCHA_TOKEN,
         });
 
         Snapshot.Match(result);
@@ -42,6 +45,7 @@ public class AuthHandlerRegisterReturnsSuccessWhenANewProfileIsCreated : HttpSer
         builder.Register((_, _) => StubHelper.DateTimeServiceStub);
         builder.RegisterType<RngServiceMock>().As<RngService>();
         builder.RegisterType<PasswordServiceMock>().As<PasswordService>();
+        builder.RegisterType<RecaptchaServiceMock>().As<RecaptchaService>().InstancePerLifetimeScope();
         builder.RegisterType<StructuredLogMock>().As<Log>();
     }
 
@@ -52,6 +56,7 @@ public class AuthHandlerRegisterReturnsSuccessWhenANewProfileIsCreated : HttpSer
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
+            RecaptchaToken = TEST_RECAPTCHA_TOKEN,
         });
 
         var profile = await this.Db.Poco.UserProfiles.FirstOrDefaultAsync(x => x.EmailAddress == TEST_EMAIL);
@@ -74,6 +79,7 @@ public class AuthHandlerLoginReturnsAnErrorOnWrongUsername : HttpServerAppTest
         builder.Register((_, _) => StubHelper.DateTimeServiceStub);
         builder.RegisterType<RngServiceMock>().As<RngService>();
         builder.RegisterType<PasswordServiceMock>().As<PasswordService>();
+        builder.RegisterType<RecaptchaServiceMock>().As<RecaptchaService>().InstancePerLifetimeScope();
         builder.RegisterType<StructuredLogMock>().As<Log>();
     }
 
@@ -84,6 +90,7 @@ public class AuthHandlerLoginReturnsAnErrorOnWrongUsername : HttpServerAppTest
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
+            RecaptchaToken = TEST_RECAPTCHA_TOKEN,
         });
 
         Snapshot.Match(result);
@@ -97,6 +104,7 @@ public class AuthHandlerLoginReturnsAnErrorOnWrongPassword : HttpServerAppTest
         builder.Register((_, _) => StubHelper.DateTimeServiceStub);
         builder.RegisterType<RngServiceMock>().As<RngService>();
         builder.RegisterType<PasswordServiceMock>().As<PasswordService>();
+        builder.RegisterType<RecaptchaServiceMock>().As<RecaptchaService>().InstancePerLifetimeScope();
         builder.RegisterType<StructuredLogMock>().As<Log>();
     }
 
@@ -110,6 +118,7 @@ public class AuthHandlerLoginReturnsAnErrorOnWrongPassword : HttpServerAppTest
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD + "wrong",
+            RecaptchaToken = TEST_RECAPTCHA_TOKEN,
         });
 
         Snapshot.Match(result);
@@ -123,6 +132,7 @@ public class AuthHandlerLoginReturnsAnErrorWhenTheLoginIsDisabled : HttpServerAp
         builder.Register((_, _) => StubHelper.DateTimeServiceStub);
         builder.RegisterType<RngServiceMock>().As<RngService>();
         builder.RegisterType<PasswordServiceMock>().As<PasswordService>();
+        builder.RegisterType<RecaptchaServiceMock>().As<RecaptchaService>().InstancePerLifetimeScope();
         builder.RegisterType<StructuredLogMock>().As<Log>();
     }
 
@@ -138,6 +148,7 @@ public class AuthHandlerLoginReturnsAnErrorWhenTheLoginIsDisabled : HttpServerAp
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
+            RecaptchaToken = TEST_RECAPTCHA_TOKEN,
         });
 
         Snapshot.Match(result);
@@ -151,6 +162,7 @@ public class AuthHandlerLoginWorksInTheCorrectCase : HttpServerAppTest
         builder.Register((_, _) => StubHelper.DateTimeServiceStub);
         builder.RegisterType<RngServiceMock>().As<RngService>();
         builder.RegisterType<PasswordServiceMock>().As<PasswordService>();
+        builder.RegisterType<RecaptchaServiceMock>().As<RecaptchaService>().InstancePerLifetimeScope();
         builder.RegisterType<StructuredLogMock>().As<Log>();
     }
 
@@ -164,6 +176,7 @@ public class AuthHandlerLoginWorksInTheCorrectCase : HttpServerAppTest
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
+            RecaptchaToken = TEST_RECAPTCHA_TOKEN,
         });
 
         Snapshot.Match(result);
@@ -177,6 +190,7 @@ public class AuthHandlerProfileInfoWorks : HttpServerAppTest
         builder.Register((_, _) => StubHelper.DateTimeServiceStub);
         builder.RegisterType<RngServiceMock>().As<RngService>();
         builder.RegisterType<PasswordServiceMock>().As<PasswordService>();
+        builder.RegisterType<RecaptchaServiceMock>().As<RecaptchaService>().InstancePerLifetimeScope();
         builder.RegisterType<StructuredLogMock>().As<Log>();
     }
 

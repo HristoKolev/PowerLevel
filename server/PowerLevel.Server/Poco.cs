@@ -650,7 +650,7 @@ public class UserProfilePoco : IPoco<UserProfilePoco>
 public class UserSessionPoco : IPoco<UserSessionPoco>
 {
     /// <summary>
-    /// <para>Column name: 'csrf_token'.</para>
+    /// <para>Column name: 'csrf_token_hash'.</para>
     /// <para>Table name: 'user_sessions'.</para>
     /// <para>This column is not nullable.</para>
     /// <para>PostgreSQL data type: 'text'.</para>
@@ -659,21 +659,34 @@ public class UserSessionPoco : IPoco<UserSessionPoco>
     /// <para>linq2db data type: 'DataType.Text'.</para>
     /// </summary>
     [LinqToDB.Mapping.NotNull]
-    [Column(Name = "csrf_token", DataType = DataType.Text)]
-    public string CsrfToken { get; set; }
+    [Column(Name = "csrf_token_hash", DataType = DataType.Text)]
+    public string CsrfTokenHash { get; set; }
 
     /// <summary>
     /// <para>Column name: 'expiration_date'.</para>
     /// <para>Table name: 'user_sessions'.</para>
-    /// <para>This column is nullable.</para>
+    /// <para>This column is not nullable.</para>
     /// <para>PostgreSQL data type: 'timestamp with time zone'.</para>
     /// <para>NpgsqlDbType: 'NpgsqlDbType.TimestampTz'.</para>
-    /// <para>CLR type: 'DateTime?'.</para>
+    /// <para>CLR type: 'DateTime'.</para>
     /// <para>linq2db data type: 'DataType.DateTime2'.</para>
     /// </summary>
-    [Nullable]
+    [LinqToDB.Mapping.NotNull]
     [Column(Name = "expiration_date", DataType = DataType.DateTime2)]
-    public DateTime? ExpirationDate { get; set; }
+    public DateTime ExpirationDate { get; set; }
+
+    /// <summary>
+    /// <para>Column name: 'logged_out'.</para>
+    /// <para>Table name: 'user_sessions'.</para>
+    /// <para>This column is not nullable.</para>
+    /// <para>PostgreSQL data type: 'boolean'.</para>
+    /// <para>NpgsqlDbType: 'NpgsqlDbType.Boolean'.</para>
+    /// <para>CLR type: 'bool'.</para>
+    /// <para>linq2db data type: 'DataType.Boolean'.</para>
+    /// </summary>
+    [LinqToDB.Mapping.NotNull]
+    [Column(Name = "logged_out", DataType = DataType.Boolean)]
+    public bool LoggedOut { get; set; }
 
     /// <summary>
     /// <para>Column name: 'login_date'.</para>
@@ -702,6 +715,19 @@ public class UserSessionPoco : IPoco<UserSessionPoco>
     [LinqToDB.Mapping.NotNull]
     [Column(Name = "login_id", DataType = DataType.Int32)]
     public int LoginID { get; set; }
+
+    /// <summary>
+    /// <para>Column name: 'logout_date'.</para>
+    /// <para>Table name: 'user_sessions'.</para>
+    /// <para>This column is nullable.</para>
+    /// <para>PostgreSQL data type: 'timestamp with time zone'.</para>
+    /// <para>NpgsqlDbType: 'NpgsqlDbType.TimestampTz'.</para>
+    /// <para>CLR type: 'DateTime?'.</para>
+    /// <para>linq2db data type: 'DataType.DateTime2'.</para>
+    /// </summary>
+    [Nullable]
+    [Column(Name = "logout_date", DataType = DataType.DateTime2)]
+    public DateTime? LogoutDate { get; set; }
 
     /// <summary>
     /// <para>Column name: 'profile_id'.</para>
@@ -741,12 +767,19 @@ public class UserSessionPoco : IPoco<UserSessionPoco>
         {
             new NpgsqlParameter<string>
             {
-                TypedValue = this.CsrfToken,
+                TypedValue = this.CsrfTokenHash,
                 NpgsqlDbType = NpgsqlDbType.Text,
             },
-            this.ExpirationDate.HasValue
-                ? new NpgsqlParameter<DateTime> { TypedValue = this.ExpirationDate.Value, NpgsqlDbType = NpgsqlDbType.TimestampTz }
-                : new NpgsqlParameter { Value = DBNull.Value },
+            new NpgsqlParameter<DateTime>
+            {
+                TypedValue = this.ExpirationDate,
+                NpgsqlDbType = NpgsqlDbType.TimestampTz,
+            },
+            new NpgsqlParameter<bool>
+            {
+                TypedValue = this.LoggedOut,
+                NpgsqlDbType = NpgsqlDbType.Boolean,
+            },
             new NpgsqlParameter<DateTime>
             {
                 TypedValue = this.LoginDate,
@@ -757,6 +790,9 @@ public class UserSessionPoco : IPoco<UserSessionPoco>
                 TypedValue = this.LoginID,
                 NpgsqlDbType = NpgsqlDbType.Integer,
             },
+            this.LogoutDate.HasValue
+                ? new NpgsqlParameter<DateTime> {TypedValue = this.LogoutDate.Value, NpgsqlDbType = NpgsqlDbType.TimestampTz}
+                : new NpgsqlParameter {Value = DBNull.Value},
             new NpgsqlParameter<int>
             {
                 TypedValue = this.ProfileID,
@@ -782,27 +818,31 @@ public class UserSessionPoco : IPoco<UserSessionPoco>
 
     public async Task WriteToImporter(NpgsqlBinaryImporter importer)
     {
-        if (this.CsrfToken == null)
+        if (this.CsrfTokenHash == null)
         {
             await importer.WriteNullAsync();
         }
         else
         {
-            await importer.WriteAsync(this.CsrfToken, NpgsqlDbType.Text);
+            await importer.WriteAsync(this.CsrfTokenHash, NpgsqlDbType.Text);
         }
 
-        if (!this.ExpirationDate.HasValue)
-        {
-            await importer.WriteNullAsync();
-        }
-        else
-        {
-            await importer.WriteAsync(this.ExpirationDate.Value, NpgsqlDbType.TimestampTz);
-        }
+        await importer.WriteAsync(this.ExpirationDate, NpgsqlDbType.TimestampTz);
+
+        await importer.WriteAsync(this.LoggedOut, NpgsqlDbType.Boolean);
 
         await importer.WriteAsync(this.LoginDate, NpgsqlDbType.TimestampTz);
 
         await importer.WriteAsync(this.LoginID, NpgsqlDbType.Integer);
+
+        if (!this.LogoutDate.HasValue)
+        {
+            await importer.WriteNullAsync();
+        }
+        else
+        {
+            await importer.WriteAsync(this.LogoutDate.Value, NpgsqlDbType.TimestampTz);
+        }
 
         await importer.WriteAsync(this.ProfileID, NpgsqlDbType.Integer);
     }
@@ -1695,7 +1735,7 @@ public class DbMetadata
                 {
                     ColumnComment = "" == string.Empty ? null : "",
                     Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
-                    ColumnName = "csrf_token",
+                    ColumnName = "csrf_token_hash",
                     DbDataType = "text",
                     IsNullable = bool.Parse("False"),
                     IsPrimaryKey = bool.Parse("False"),
@@ -1705,7 +1745,7 @@ public class DbMetadata
                     ForeignKeyReferenceColumnName = "" == string.Empty ? null : "",
                     ForeignKeyReferenceSchemaName = "" == string.Empty ? null : "",
                     ForeignKeyReferenceTableName = "" == string.Empty ? null : "",
-                    PropertyName = "CsrfToken",
+                    PropertyName = "CsrfTokenHash",
                     TableName = "user_sessions",
                     TableSchema = "public",
                     PropertyType = new SimpleType
@@ -1733,7 +1773,7 @@ public class DbMetadata
                     Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
                     ColumnName = "expiration_date",
                     DbDataType = "timestamp with time zone",
-                    IsNullable = bool.Parse("True"),
+                    IsNullable = bool.Parse("False"),
                     IsPrimaryKey = bool.Parse("False"),
                     PrimaryKeyConstraintName = "" == string.Empty ? null : "",
                     IsForeignKey = bool.Parse("False"),
@@ -1746,21 +1786,57 @@ public class DbMetadata
                     TableSchema = "public",
                     PropertyType = new SimpleType
                     {
-                        ClrTypeName = "DateTime?",
-                        ClrType = typeof(DateTime?),
+                        ClrTypeName = "DateTime",
+                        ClrType = typeof(DateTime),
                         ClrNonNullableTypeName = "DateTime",
                         ClrNonNullableType = typeof(DateTime),
                         ClrNullableTypeName = "DateTime?",
                         ClrNullableType = typeof(DateTime?),
                         DbDataType = "timestamp with time zone",
-                        IsNullable = bool.Parse("True"),
+                        IsNullable = bool.Parse("False"),
                         IsClrValueType = bool.Parse("True"),
-                        IsClrNullableType = bool.Parse("True"),
-                        IsClrReferenceType = bool.Parse("True"),
+                        IsClrNullableType = bool.Parse("False"),
+                        IsClrReferenceType = bool.Parse("False"),
                         Linq2DbDataTypeName = "DataType.DateTime2",
                         Linq2DbDataType = DataType.DateTime2,
                         NpgsqlDbTypeName = "NpgsqlDbType.TimestampTz",
                         NpgsqlDbType = NpgsqlDbType.TimestampTz,
+                    },
+                },
+                new ColumnMetadataModel
+                {
+                    ColumnComment = "" == string.Empty ? null : "",
+                    Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
+                    ColumnName = "logged_out",
+                    DbDataType = "boolean",
+                    IsNullable = bool.Parse("False"),
+                    IsPrimaryKey = bool.Parse("False"),
+                    PrimaryKeyConstraintName = "" == string.Empty ? null : "",
+                    IsForeignKey = bool.Parse("False"),
+                    ForeignKeyConstraintName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceColumnName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceSchemaName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceTableName = "" == string.Empty ? null : "",
+                    PropertyName = "LoggedOut",
+                    TableName = "user_sessions",
+                    TableSchema = "public",
+                    PropertyType = new SimpleType
+                    {
+                        ClrTypeName = "bool",
+                        ClrType = typeof(bool),
+                        ClrNonNullableTypeName = "bool",
+                        ClrNonNullableType = typeof(bool),
+                        ClrNullableTypeName = "bool?",
+                        ClrNullableType = typeof(bool?),
+                        DbDataType = "boolean",
+                        IsNullable = bool.Parse("False"),
+                        IsClrValueType = bool.Parse("True"),
+                        IsClrNullableType = bool.Parse("False"),
+                        IsClrReferenceType = bool.Parse("False"),
+                        Linq2DbDataTypeName = "DataType.Boolean",
+                        Linq2DbDataType = DataType.Boolean,
+                        NpgsqlDbTypeName = "NpgsqlDbType.Boolean",
+                        NpgsqlDbType = NpgsqlDbType.Boolean,
                     },
                 },
                 new ColumnMetadataModel
@@ -1839,6 +1915,42 @@ public class DbMetadata
                 {
                     ColumnComment = "" == string.Empty ? null : "",
                     Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
+                    ColumnName = "logout_date",
+                    DbDataType = "timestamp with time zone",
+                    IsNullable = bool.Parse("True"),
+                    IsPrimaryKey = bool.Parse("False"),
+                    PrimaryKeyConstraintName = "" == string.Empty ? null : "",
+                    IsForeignKey = bool.Parse("False"),
+                    ForeignKeyConstraintName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceColumnName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceSchemaName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceTableName = "" == string.Empty ? null : "",
+                    PropertyName = "LogoutDate",
+                    TableName = "user_sessions",
+                    TableSchema = "public",
+                    PropertyType = new SimpleType
+                    {
+                        ClrTypeName = "DateTime?",
+                        ClrType = typeof(DateTime?),
+                        ClrNonNullableTypeName = "DateTime",
+                        ClrNonNullableType = typeof(DateTime),
+                        ClrNullableTypeName = "DateTime?",
+                        ClrNullableType = typeof(DateTime?),
+                        DbDataType = "timestamp with time zone",
+                        IsNullable = bool.Parse("True"),
+                        IsClrValueType = bool.Parse("True"),
+                        IsClrNullableType = bool.Parse("True"),
+                        IsClrReferenceType = bool.Parse("True"),
+                        Linq2DbDataTypeName = "DataType.DateTime2",
+                        Linq2DbDataType = DataType.DateTime2,
+                        NpgsqlDbTypeName = "NpgsqlDbType.TimestampTz",
+                        NpgsqlDbType = NpgsqlDbType.TimestampTz,
+                    },
+                },
+                new ColumnMetadataModel
+                {
+                    ColumnComment = "" == string.Empty ? null : "",
+                    Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
                     ColumnName = "profile_id",
                     DbDataType = "integer",
                     IsNullable = bool.Parse("False"),
@@ -1910,12 +2022,15 @@ public class DbMetadata
             },
             NonPkColumnNames = new[]
             {
-                "csrf_token",
+                "csrf_token_hash",
                 "expiration_date",
+                "logged_out",
                 "login_date",
                 "login_id",
+                "logout_date",
                 "profile_id",
             },
         };
+
     }
 }

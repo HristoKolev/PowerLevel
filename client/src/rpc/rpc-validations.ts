@@ -9,6 +9,8 @@ export const rpcValidations = {
     rememberMe: {},
     recaptchaToken: {},
   },
+  logoutRequest: {
+  },
   pingRequest: {
   },
   profileInfoRequest: {

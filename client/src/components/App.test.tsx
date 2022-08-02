@@ -27,8 +27,6 @@ describe('<App />', () => {
 
     const brandName = await screen.findByTestId('brand-name');
 
-    expect(brandName).toBeInTheDocument();
-
     expect(brandName).toHaveTextContent('Power Level');
   });
 });

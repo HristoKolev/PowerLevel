@@ -9,6 +9,3 @@
 
 - Put a react error boundary inside and outside the router.
 - Abstract that away.
-
-## Redux setup
-- Redux/Toolkit setup

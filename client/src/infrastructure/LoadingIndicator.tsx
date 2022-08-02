@@ -1,5 +1,5 @@
-import { CircularProgress } from '@mui/material';
 import { memo, useState, useEffect } from 'react';
+import { CircularProgress } from '@mui/material';
 
 const defaultDelay = 500;
 

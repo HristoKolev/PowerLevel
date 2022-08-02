@@ -14,6 +14,11 @@ public abstract class RpcClient
         return this.RpcExecute<LoginRequest, LoginResponse>(request);
     }
 
+    public virtual Task<ApiResult<LogoutResponse>> Logout(LogoutRequest request)
+    {
+        return this.RpcExecute<LogoutRequest, LogoutResponse>(request);
+    }
+
     public virtual Task<ApiResult<PingResponse>> Ping(PingRequest request)
     {
         return this.RpcExecute<PingRequest, PingResponse>(request);

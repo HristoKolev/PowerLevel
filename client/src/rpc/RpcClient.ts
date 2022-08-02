@@ -59,6 +59,14 @@ export class RpcClient {
     return this.baseClient.sendResult('LoginRequest', request);
   }
 
+  logout(): Promise<void> {
+    return this.baseClient.send('LogoutRequest');
+  }
+
+  logoutResult(): Promise<ApiResult> {
+    return this.baseClient.sendResult('LogoutRequest');
+  }
+
   ping(): Promise<PingResponse> {
     return this.baseClient.send('PingRequest');
   }

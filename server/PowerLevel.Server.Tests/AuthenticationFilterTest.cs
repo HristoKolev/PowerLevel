@@ -19,7 +19,8 @@ public class AuthenticationFilterTest
         var authenticationFilter = new AuthenticationFilter(
             CreateJwtService(),
             CreateAuthService(null),
-            StubHelper.DateTimeServiceStub
+            StubHelper.DateTimeServiceStub,
+            CreatePasswordService()
         );
 
         var authResult = await authenticationFilter.Authenticate(null);
@@ -33,7 +34,8 @@ public class AuthenticationFilterTest
         var authenticationFilter = new AuthenticationFilter(
             CreateJwtService(),
             CreateAuthService(null),
-            StubHelper.DateTimeServiceStub
+            StubHelper.DateTimeServiceStub,
+            CreatePasswordService()
         );
 
         var headers = new HeaderDictionary();
@@ -49,7 +51,8 @@ public class AuthenticationFilterTest
         var authenticationFilter = new AuthenticationFilter(
             CreateJwtService(),
             CreateAuthService(null),
-            StubHelper.DateTimeServiceStub
+            StubHelper.DateTimeServiceStub,
+            CreatePasswordService()
         );
 
         var headers = new HeaderDictionary { { COOKIE_HEADER_NAME, value } };
@@ -68,7 +71,8 @@ public class AuthenticationFilterTest
         var authenticationFilter = new AuthenticationFilter(
             CreateJwtService(),
             CreateAuthService(null),
-            StubHelper.DateTimeServiceStub
+            StubHelper.DateTimeServiceStub,
+            CreatePasswordService()
         );
 
         var headers = new HeaderDictionary { { COOKIE_HEADER_NAME, value } };
@@ -83,7 +87,8 @@ public class AuthenticationFilterTest
         var authenticationFilter = new AuthenticationFilter(
             CreateJwtService(),
             CreateAuthService(null),
-            StubHelper.DateTimeServiceStub
+            StubHelper.DateTimeServiceStub,
+            CreatePasswordService()
         );
 
         var headers = new HeaderDictionary { { COOKIE_HEADER_NAME, "jwt=x" } };
@@ -100,7 +105,8 @@ public class AuthenticationFilterTest
         var authenticationFilter = new AuthenticationFilter(
             jwtService,
             authService,
-            StubHelper.DateTimeServiceStub
+            StubHelper.DateTimeServiceStub,
+            CreatePasswordService()
         );
 
         string jwt = jwtService.EncodeSession(new JwtPayload { SessionID = 0 });
@@ -129,7 +135,38 @@ public class AuthenticationFilterTest
         var authenticationFilter = new AuthenticationFilter(
             jwtService,
             authService,
-            dateTimeService
+            dateTimeService,
+            CreatePasswordService()
+        );
+
+        string jwt = jwtService.EncodeSession(new JwtPayload { SessionID = 1 });
+        var headers = new HeaderDictionary { { COOKIE_HEADER_NAME, $"jwt={jwt}" } };
+        var authResult = await authenticationFilter.Authenticate(headers);
+
+        AssertAnonymous(authResult);
+    }
+
+    [Fact]
+    public async Task Authenticate_returns_anonymous_on_logged_out_session()
+    {
+        var dateTimeService = StubHelper.DateTimeServiceStub;
+        var jwtService = CreateJwtService();
+
+        var session = new UserSessionPoco
+        {
+            SessionID = 1,
+            LoginID = 1,
+            ProfileID = 1,
+            LoggedOut = true,
+        };
+
+        var authService = CreateAuthService(session);
+
+        var authenticationFilter = new AuthenticationFilter(
+            jwtService,
+            authService,
+            dateTimeService,
+            CreatePasswordService()
         );
 
         string jwt = jwtService.EncodeSession(new JwtPayload { SessionID = 1 });
@@ -150,6 +187,7 @@ public class AuthenticationFilterTest
             SessionID = 1,
             LoginID = 1,
             ProfileID = 1,
+            ExpirationDate = dateTimeService.EventTime().AddYears(1),
         };
 
         var authService = CreateAuthService(session);
@@ -157,7 +195,8 @@ public class AuthenticationFilterTest
         var authenticationFilter = new AuthenticationFilter(
             jwtService,
             authService,
-            dateTimeService
+            dateTimeService,
+            CreatePasswordService()
         );
 
         string jwt = jwtService.EncodeSession(new JwtPayload { SessionID = 1 });
@@ -175,13 +214,15 @@ public class AuthenticationFilterTest
         var dateTimeService = StubHelper.DateTimeServiceStub;
         var jwtService = CreateJwtService();
         const string CSRF_TOKEN = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        const string CSRF_TOKEN_HASH = "$$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx$$";
 
         var session = new UserSessionPoco
         {
             SessionID = 1,
             LoginID = 1,
             ProfileID = 1,
-            CsrfToken = CSRF_TOKEN,
+            CsrfTokenHash = CSRF_TOKEN_HASH,
+            ExpirationDate = dateTimeService.EventTime().AddYears(1),
         };
 
         var authService = CreateAuthService(session);
@@ -189,7 +230,8 @@ public class AuthenticationFilterTest
         var authenticationFilter = new AuthenticationFilter(
             jwtService,
             authService,
-            dateTimeService
+            dateTimeService,
+            CreatePasswordService()
         );
 
         string jwt = jwtService.EncodeSession(new JwtPayload { SessionID = 1 });
@@ -212,13 +254,15 @@ public class AuthenticationFilterTest
         var dateTimeService = StubHelper.DateTimeServiceStub;
         var jwtService = CreateJwtService();
         const string CSRF_TOKEN = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        const string CSRF_TOKEN_HASH = "$$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx$$";
 
         var session = new UserSessionPoco
         {
             SessionID = 1,
             LoginID = 1,
             ProfileID = 1,
-            CsrfToken = CSRF_TOKEN,
+            CsrfTokenHash = CSRF_TOKEN_HASH,
+            ExpirationDate = dateTimeService.EventTime().AddYears(1),
         };
 
         var authService = CreateAuthService(session);
@@ -226,7 +270,8 @@ public class AuthenticationFilterTest
         var authenticationFilter = new AuthenticationFilter(
             jwtService,
             authService,
-            dateTimeService
+            dateTimeService,
+            CreatePasswordService()
         );
 
         string jwt = jwtService.EncodeSession(new JwtPayload { SessionID = 1 });
@@ -275,7 +320,12 @@ public class AuthenticationFilterTest
         return authService;
     }
 
-    private static JwtServiceImpl CreateJwtService()
+    private static PasswordService CreatePasswordService()
+    {
+        return new PasswordServiceMock();
+    }
+
+    private static JwtService CreateJwtService()
     {
         var pool = new SessionCertificatePool(new HttpServerAppConfig
         {
