@@ -31,7 +31,7 @@ export const LoadingIndicator = memo(
     }
 
     return (
-      <div className="py-6">
+      <div className="py-6" data-testid="loading-indicator">
         <div className="text-center">{message || 'Loading...'}</div>
         <div className="text-center mt-5 mr-3">
           <CircularProgress />

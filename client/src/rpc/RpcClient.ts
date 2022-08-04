@@ -1,6 +1,7 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable prettier/prettier */
-import { BaseRpcClient, ApiResult } from './BaseRpcClient';
+import { BaseRpcClient } from './BaseRpcClient';
+import { ApiResult } from './api-result';
 
 export interface LoginRequest {
   emailAddress: string;

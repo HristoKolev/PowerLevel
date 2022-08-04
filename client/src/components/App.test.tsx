@@ -4,29 +4,27 @@ import { App } from '~components/App';
 import { createStore } from '~infrastructure/redux';
 import { ResizeObserverMock } from '~infrastructure/test-utils';
 
-describe('<App />', () => {
-  beforeAll(() => {
-    ResizeObserverMock.enableMock();
-  });
+beforeAll(() => {
+  ResizeObserverMock.enableMock();
+});
 
-  afterAll(() => {
-    ResizeObserverMock.disableMock();
-  });
+afterAll(() => {
+  ResizeObserverMock.disableMock();
+});
 
-  afterEach(() => {
-    ResizeObserverMock.clearInstances();
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
-    jest.resetModules();
-  });
+afterEach(() => {
+  ResizeObserverMock.clearInstances();
+  jest.resetAllMocks();
+  jest.restoreAllMocks();
+  jest.resetModules();
+});
 
-  test('renders without error', async () => {
-    const store = createStore();
+test('renders without error', async () => {
+  const store = createStore();
 
-    render(<App store={store} />);
+  render(<App store={store} />);
 
-    const brandName = await screen.findByTestId('brand-name');
+  const brandName = await screen.findByTestId('brand-name');
 
-    expect(brandName).toHaveTextContent('Power Level');
-  });
+  expect(brandName).toHaveTextContent('Power Level');
 });

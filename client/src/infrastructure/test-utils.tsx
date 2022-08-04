@@ -1,19 +1,23 @@
-import { ReactNode } from 'react';
+import { ReactElement } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { RenderOptions, RenderResult, render } from '@testing-library/react';
 
 import { StoreType, createStore } from '~infrastructure/redux';
 
-interface TestSetupProps {
-  children: ReactNode;
-  store?: StoreType;
+export function renderWithProviders(
+  ui: ReactElement,
+  store?: StoreType,
+  options?: Omit<RenderOptions, 'queries'>
+): RenderResult {
+  return render(
+    <BrowserRouter>
+      <Provider store={store || createStore()}>{ui}</Provider>
+    </BrowserRouter>,
+    options
+  );
 }
-
-export const TestSetup = ({ children, store }: TestSetupProps) => (
-  <BrowserRouter>
-    <Provider store={store || createStore()}>{children}</Provider>
-  </BrowserRouter>
-);
 
 export class ResizeObserverMock {
   private static originalResizeObserver: unknown;

@@ -1,9 +1,5 @@
+import { ApiResult } from './api-result';
 import { DefaultApiError } from './RpcClient';
-
-export type ApiResult<
-  TPayload = null,
-  TError extends DefaultApiError = DefaultApiError
-> = { isOk: true; payload: TPayload } | { isOk: false; error: TError };
 
 class RpcErrorImpl extends Error {
   constructor(error: DefaultApiError) {

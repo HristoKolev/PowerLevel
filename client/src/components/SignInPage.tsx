@@ -151,7 +151,9 @@ export const SignInPage = memo((): JSX.Element => {
           {serverResult && !serverResult.isOk && (
             <Alert severity="error">
               {serverResult.error.errorMessages.map((x) => (
-                <div key={x}>{x}</div>
+                <div data-testid="error-message" key={x}>
+                  {x}
+                </div>
               ))}
             </Alert>
           )}

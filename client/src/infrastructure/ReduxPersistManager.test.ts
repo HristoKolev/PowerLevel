@@ -51,97 +51,96 @@ const createTestStore = (preloadedState?: unknown) =>
 
 const STORAGE_KEY = 'STORAGE_KEY';
 
-describe('ReduxPersistManager', () => {
-  afterEach(() => {
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
-    jest.resetModules();
-  });
+afterEach(() => {
+  jest.resetAllMocks();
+  jest.restoreAllMocks();
+  jest.resetModules();
+});
 
-  test('readPersistedState returns an empty object when storage location is empty', async () => {
-    const reduxPersistManager = new ReduxPersistManager(
-      new InMemoryStorage(),
-      STORAGE_KEY,
-      ['slice1']
-    );
+test('readPersistedState returns an empty object when storage location is empty', async () => {
+  const reduxPersistManager = new ReduxPersistManager(
+    new InMemoryStorage(),
+    STORAGE_KEY,
+    ['slice1']
+  );
 
-    expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(
-      `Object {}`
-    );
-  });
+  expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(
+    `Object {}`
+  );
+});
 
-  test('readPersistedState returns correct value when persisted state is available', async () => {
-    const storage = new InMemoryStorage();
+test('readPersistedState returns correct value when persisted state is available', async () => {
+  const storage = new InMemoryStorage();
 
-    const reduxPersistManager = new ReduxPersistManager(storage, STORAGE_KEY, [
-      'slice1',
-    ]);
+  const reduxPersistManager = new ReduxPersistManager(storage, STORAGE_KEY, [
+    'slice1',
+  ]);
 
-    storage.setItem(STORAGE_KEY, JSON.stringify({ slice1: { value: true } }));
+  storage.setItem(STORAGE_KEY, JSON.stringify({ slice1: { value: true } }));
 
-    expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(`
+  expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(`
       Object {
         "slice1": Object {
           "value": true,
         },
       }
     `);
-  });
+});
 
-  test('readPersistedState returns and empty object when storage throws an error', async () => {
-    const storage = new InMemoryStorage();
-    storage.throwOnAccess = true;
+test('readPersistedState returns and empty object when storage throws an error', async () => {
+  const storage = new InMemoryStorage();
+  storage.throwOnAccess = true;
 
-    const reduxPersistManager = new ReduxPersistManager(storage, STORAGE_KEY, [
-      'slice1',
-    ]);
+  const reduxPersistManager = new ReduxPersistManager(storage, STORAGE_KEY, [
+    'slice1',
+  ]);
 
-    expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(
-      `Object {}`
-    );
-  });
+  expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(
+    `Object {}`
+  );
+});
 
-  test('readPersistedState only returns fields that have been specified', async () => {
-    const storage = new InMemoryStorage();
+test('readPersistedState only returns fields that have been specified', async () => {
+  const storage = new InMemoryStorage();
 
-    const reduxPersistManager = new ReduxPersistManager(storage, STORAGE_KEY, [
-      'slice1',
-    ]);
+  const reduxPersistManager = new ReduxPersistManager(storage, STORAGE_KEY, [
+    'slice1',
+  ]);
 
-    storage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        slice1: { value: true },
-        notSpecifiedKey: 'value',
-      })
-    );
+  storage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      slice1: { value: true },
+      notSpecifiedKey: 'value',
+    })
+  );
 
-    expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(`
+  expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(`
       Object {
         "slice1": Object {
           "value": true,
         },
       }
     `);
-  });
+});
 
-  test('subscribe subscribes on state changes and saves the specified fields to given storage', async () => {
-    const storage = new InMemoryStorage();
+test('subscribe subscribes on state changes and saves the specified fields to given storage', async () => {
+  const storage = new InMemoryStorage();
 
-    const reduxPersistManager = new ReduxPersistManager(storage, STORAGE_KEY, [
-      'slice1',
-    ]);
+  const reduxPersistManager = new ReduxPersistManager(storage, STORAGE_KEY, [
+    'slice1',
+  ]);
 
-    const store = createTestStore();
+  const store = createTestStore();
 
-    reduxPersistManager.subscribe(store);
+  reduxPersistManager.subscribe(store);
 
-    expect(storage.getItem(STORAGE_KEY)).toBeUndefined();
+  expect(storage.getItem(STORAGE_KEY)).toBeUndefined();
 
-    store.dispatch(slice1.actions.toggleState());
+  store.dispatch(slice1.actions.toggleState());
 
-    expect(JSON.parse(storage.getItem(STORAGE_KEY) as string))
-      .toMatchInlineSnapshot(`
+  expect(JSON.parse(storage.getItem(STORAGE_KEY) as string))
+    .toMatchInlineSnapshot(`
       Object {
         "slice1": Object {
           "value": true,
@@ -149,63 +148,30 @@ describe('ReduxPersistManager', () => {
       }
     `);
 
-    store.dispatch(slice1.actions.toggleState());
+  store.dispatch(slice1.actions.toggleState());
 
-    expect(JSON.parse(storage.getItem(STORAGE_KEY) as string))
-      .toMatchInlineSnapshot(`
+  expect(JSON.parse(storage.getItem(STORAGE_KEY) as string))
+    .toMatchInlineSnapshot(`
       Object {
         "slice1": Object {
           "value": false,
         },
       }
     `);
-  });
+});
 
-  test('storage is not updated when non persistent state is changed', async () => {
-    const storage = new InMemoryStorage();
-    storage.setItem(STORAGE_KEY, JSON.stringify({ slice1: { value: false } }));
-    storage.setItem = jest.fn();
+test('storage is not updated when non persistent state is changed', async () => {
+  const storage = new InMemoryStorage();
+  storage.setItem(STORAGE_KEY, JSON.stringify({ slice1: { value: false } }));
+  storage.setItem = jest.fn();
 
-    const reduxPersistManager = new ReduxPersistManager(storage, STORAGE_KEY, [
-      'slice1',
-    ]);
+  const reduxPersistManager = new ReduxPersistManager(storage, STORAGE_KEY, [
+    'slice1',
+  ]);
 
-    const persistedState = reduxPersistManager.readPersistedState();
+  const persistedState = reduxPersistManager.readPersistedState();
 
-    expect(persistedState).toMatchInlineSnapshot(`
-      Object {
-        "slice1": Object {
-          "value": false,
-        },
-      }
-    `);
-
-    const store = createTestStore(persistedState);
-
-    reduxPersistManager.subscribe(store);
-
-    store.dispatch(slice2.actions.toggleState());
-
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(storage.setItem).not.toHaveBeenCalled();
-
-    store.dispatch(slice2.actions.toggleState());
-
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(storage.setItem).not.toHaveBeenCalled();
-  });
-
-  test('storage is not updated after unsubscribe is called', async () => {
-    const storage = new InMemoryStorage();
-    storage.setItem(STORAGE_KEY, JSON.stringify({ slice1: { value: false } }));
-
-    const reduxPersistManager = new ReduxPersistManager(storage, STORAGE_KEY, [
-      'slice1',
-    ]);
-
-    const persistedState = reduxPersistManager.readPersistedState();
-
-    expect(persistedState).toMatchInlineSnapshot(`
+  expect(persistedState).toMatchInlineSnapshot(`
       Object {
         "slice1": Object {
           "value": false,
@@ -213,14 +179,47 @@ describe('ReduxPersistManager', () => {
       }
     `);
 
-    const store = createTestStore(persistedState);
+  const store = createTestStore(persistedState);
 
-    const unsubscribe = reduxPersistManager.subscribe(store);
+  reduxPersistManager.subscribe(store);
 
-    store.dispatch(slice1.actions.toggleState());
+  store.dispatch(slice2.actions.toggleState());
 
-    expect(JSON.parse(storage.getItem(STORAGE_KEY) as string))
-      .toMatchInlineSnapshot(`
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  expect(storage.setItem).not.toHaveBeenCalled();
+
+  store.dispatch(slice2.actions.toggleState());
+
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  expect(storage.setItem).not.toHaveBeenCalled();
+});
+
+test('storage is not updated after unsubscribe is called', async () => {
+  const storage = new InMemoryStorage();
+  storage.setItem(STORAGE_KEY, JSON.stringify({ slice1: { value: false } }));
+
+  const reduxPersistManager = new ReduxPersistManager(storage, STORAGE_KEY, [
+    'slice1',
+  ]);
+
+  const persistedState = reduxPersistManager.readPersistedState();
+
+  expect(persistedState).toMatchInlineSnapshot(`
+      Object {
+        "slice1": Object {
+          "value": false,
+        },
+      }
+    `);
+
+  const store = createTestStore(persistedState);
+
+  const unsubscribe = reduxPersistManager.subscribe(store);
+
+  store.dispatch(slice1.actions.toggleState());
+
+  expect(JSON.parse(storage.getItem(STORAGE_KEY) as string))
+    .toMatchInlineSnapshot(`
       Object {
         "slice1": Object {
           "value": true,
@@ -228,18 +227,17 @@ describe('ReduxPersistManager', () => {
       }
     `);
 
-    storage.setItem = jest.fn();
+  storage.setItem = jest.fn();
 
-    unsubscribe();
+  unsubscribe();
 
-    store.dispatch(slice1.actions.toggleState());
+  store.dispatch(slice1.actions.toggleState());
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(storage.setItem).not.toHaveBeenCalled();
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  expect(storage.setItem).not.toHaveBeenCalled();
 
-    store.dispatch(slice1.actions.toggleState());
+  store.dispatch(slice1.actions.toggleState());
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(storage.setItem).not.toHaveBeenCalled();
-  });
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  expect(storage.setItem).not.toHaveBeenCalled();
 });

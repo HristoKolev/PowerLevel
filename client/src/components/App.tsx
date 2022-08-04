@@ -10,10 +10,6 @@ import { SignInPage } from '~components/SignInPage';
 import { Layout } from '~layout';
 import { isLoggedInSelector } from '~infrastructure/sessionSlice';
 
-interface AppProps {
-  store: StoreType;
-}
-
 const RoutesWrapper = memo(() => {
   const isLoggedIn = useAppSelector(isLoggedInSelector);
 
@@ -31,6 +27,10 @@ const RoutesWrapper = memo(() => {
     </Routes>
   );
 });
+
+interface AppProps {
+  store: StoreType;
+}
 
 export const App = memo(({ store }: AppProps) => (
   <StrictMode>

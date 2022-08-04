@@ -17,7 +17,8 @@ public static class TypeScriptCodeGenerator
     {
         const string FILE_HEADER = @"// eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable prettier/prettier */
-import { BaseRpcClient, ApiResult } from './BaseRpcClient';
+import { BaseRpcClient } from './BaseRpcClient';
+import { ApiResult } from './api-result';
 
 ";
         string interfaces = GenerateInterfaces(metadata);
