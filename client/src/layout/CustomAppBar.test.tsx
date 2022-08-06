@@ -11,7 +11,6 @@ import { apiResult } from '~rpc';
 
 jest.mock('react-router-dom', () => {
   const navigate = jest.fn();
-
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     ...jest.requireActual('react-router-dom'),
@@ -28,7 +27,6 @@ jest.mock('~infrastructure/create-rpc-client', () => {
       return map.get(propName);
     },
   });
-
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     ...jest.requireActual('~infrastructure/create-rpc-client'),

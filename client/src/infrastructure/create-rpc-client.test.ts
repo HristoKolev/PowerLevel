@@ -14,9 +14,7 @@ afterEach(() => {
 
 const getCSRFToken = (rpcClient: RpcClient) => {
   const baseClient = Reflect.get(rpcClient, 'baseClient') as BaseRpcClient;
-
   expect(baseClient).toBeTruthy();
-
   return baseClient.getCSRFToken();
 };
 

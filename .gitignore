@@ -206,7 +206,7 @@ dll/
 
 *\.received\.json
 
-projectfiles.tar
+dotnet-project-files.tar
 
 client/.idea/client.iml
 

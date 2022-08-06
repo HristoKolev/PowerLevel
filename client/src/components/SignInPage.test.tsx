@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { createStore } from '~infrastructure/redux';
 import { apiResult, LoginResponse } from '~rpc';
-import { delay } from '~infrastructure/helpers';
-import { renderWithProviders } from '~infrastructure/test-utils';
+import { renderWithProviders, WaitHandle } from '~infrastructure/test-utils';
 import { createRpcClient } from '~infrastructure/create-rpc-client';
 
 import { SignInPage } from './SignInPage';
@@ -25,7 +24,6 @@ jest.mock('~infrastructure/create-rpc-client', () => {
       return map.get(propName);
     },
   });
-
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     ...jest.requireActual('~infrastructure/create-rpc-client'),
@@ -35,7 +33,6 @@ jest.mock('~infrastructure/create-rpc-client', () => {
 
 jest.mock('react-router-dom', () => {
   const navigate = jest.fn();
-
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     ...jest.requireActual('react-router-dom'),
@@ -90,8 +87,10 @@ test('logs in successfully', async () => {
   await user.type(passwordField, 'password');
   await user.click(rememberMeField);
 
+  const loginResultWaitHandle = new WaitHandle();
+
   loginResultMock.mockImplementation(async () => {
-    await delay(10); // TODO: find a better way of doing this.
+    await loginResultWaitHandle.wait();
     return apiResult.ok<LoginResponse>({
       csrfToken: '__TOKEN__',
       emailAddress: 'test@test.test',
@@ -112,6 +111,8 @@ test('logs in successfully', async () => {
     expect(screen.getByTestId('submit-button')).toBeDisabled();
     expect(screen.getByTestId('loading-indicator')).toBeInTheDocument();
   });
+
+  loginResultWaitHandle.release();
 
   await waitFor(() => {
     expect(store.getState().SESSION).toStrictEqual({
@@ -142,8 +143,10 @@ test('shows error message on request failure', async () => {
 
   const errorMessages = ['Error 1', 'Error 2'];
 
+  const loginResultWaitHandle = new WaitHandle();
+
   loginResultMock.mockImplementation(async () => {
-    await delay(10); // TODO: find a better way of doing this.
+    await loginResultWaitHandle.wait();
     return apiResult.error({ errorMessages });
   });
 
@@ -160,6 +163,8 @@ test('shows error message on request failure', async () => {
     expect(screen.getByTestId('submit-button')).toBeDisabled();
     expect(screen.getByTestId('loading-indicator')).toBeInTheDocument();
   });
+
+  loginResultWaitHandle.release();
 
   await waitFor(async () => {
     const errorMessageElements = await screen.findAllByTestId('error-message');

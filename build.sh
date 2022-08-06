@@ -21,12 +21,10 @@ set -eu -o pipefail
 #   *.csproj
 #   *.sln
 
-rm ./projectfiles.tar -f
-find . \( -name "*.csproj" -o -name "*.sln" \) -print0 | tar -cvf ./projectfiles.tar --null -T -
+rm ./dotnet-project-files.tar -f
+find . \( -name "*.csproj" -o -name "*.sln" \) -print0 | tar -cvf ./dotnet-project-files.tar --null -T -
 
-export DOCKER_BUILDKIT=1
+DOCKER_BUILDKIT=1 docker build -t xdxd-registry.lan/powerlevel .
+docker push xdxd-registry.lan/powerlevel
 
-docker build -f ./ServerDockerfile -t xdxd-registry.lan/powerlevel-server .
-docker push xdxd-registry.lan/powerlevel-server
-
-rm ./projectfiles.tar -f
+rm ./dotnet-project-files.tar -f

@@ -1,13 +1,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine as dotnet-build
 
-# Cached restore step that only includes files that are required for packages to be restored.
+# Restore
 WORKDIR /work
-COPY projectfiles.tar .
-RUN tar -xvf projectfiles.tar
+COPY dotnet-project-files.tar .
+RUN tar -xvf dotnet-project-files.tar
 WORKDIR /work/server/
 RUN dotnet restore
 
-# build
+# Build
 WORKDIR /work
 COPY . .
 WORKDIR /work/server/PowerLevel.Server/
