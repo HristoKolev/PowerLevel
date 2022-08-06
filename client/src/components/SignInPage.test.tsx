@@ -2,10 +2,11 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useNavigate } from 'react-router-dom';
 
-import { createStore, createRpcClient } from '~infrastructure/redux';
+import { createStore } from '~infrastructure/redux';
 import { apiResult, LoginResponse } from '~rpc';
 import { delay } from '~infrastructure/helpers';
 import { renderWithProviders } from '~infrastructure/test-utils';
+import { createRpcClient } from '~infrastructure/create-rpc-client';
 
 import { SignInPage } from './SignInPage';
 
@@ -15,7 +16,7 @@ jest.mock('~infrastructure/RecaptchaField', () => ({
   ),
 }));
 
-jest.mock('~infrastructure/redux', () => {
+jest.mock('~infrastructure/create-rpc-client', () => {
   const proxy = new Proxy(new Map<string, unknown>(), {
     get(map, propName: string): unknown {
       if (!map.has(propName)) {
@@ -27,7 +28,7 @@ jest.mock('~infrastructure/redux', () => {
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
-    ...jest.requireActual('~infrastructure/redux'),
+    ...jest.requireActual('~infrastructure/create-rpc-client'),
     createRpcClient: () => proxy,
   };
 });
@@ -90,7 +91,7 @@ test('logs in successfully', async () => {
   await user.click(rememberMeField);
 
   loginResultMock.mockImplementation(async () => {
-    await delay(10);
+    await delay(10); // TODO: find a better way of doing this.
     return apiResult.ok<LoginResponse>({
       csrfToken: '__TOKEN__',
       emailAddress: 'test@test.test',

@@ -80,14 +80,17 @@ export const CustomAppBar = memo((): JSX.Element => {
         </div>
 
         {!isLoggedIn && (
-          <Link to="/sign-in" className="link">
+          <Link to="/sign-in" className="link" data-testid="sign-in-button">
             <Button color="inherit">Sign in</Button>
           </Link>
         )}
 
         {isLoggedIn && (
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          <Button color="inherit" onClick={handleOnLogoutClick}>
+          <Button
+            color="inherit"
+            onClick={handleOnLogoutClick as () => void}
+            data-testid="sign-out-button"
+          >
             Sign out
           </Button>
         )}

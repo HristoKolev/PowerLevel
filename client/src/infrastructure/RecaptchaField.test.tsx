@@ -39,6 +39,12 @@ const TestForm = memo(
   }
 );
 
+afterEach(() => {
+  jest.resetAllMocks();
+  jest.restoreAllMocks();
+  jest.resetModules();
+});
+
 test('sets the correct field value', async () => {
   const user = userEvent.setup();
 

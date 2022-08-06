@@ -28,7 +28,8 @@ import { RecaptchaField } from '~infrastructure/RecaptchaField';
 import { breakpoints } from '~infrastructure/helpers';
 import { LoadingIndicator } from '~infrastructure/LoadingIndicator';
 import { sessionActions } from '~infrastructure/sessionSlice';
-import { useAppDispatch, createRpcClient } from '~infrastructure/redux';
+import { useAppDispatch } from '~infrastructure/redux';
+import { createRpcClient } from '~infrastructure/create-rpc-client';
 
 const signInPageClassName = css`
   form {

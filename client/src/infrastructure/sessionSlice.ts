@@ -7,7 +7,8 @@ import {
 } from '@reduxjs/toolkit';
 
 import { LoginResponse } from '~rpc';
-import { RootState, createRpcClient } from '~infrastructure/redux';
+import { RootState } from '~infrastructure/redux';
+import { createRpcClient } from '~infrastructure/create-rpc-client';
 
 const SESSION_SLICE_KEY = 'SESSION';
 

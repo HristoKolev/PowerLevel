@@ -105,7 +105,16 @@ test("breakpoint changes when the root element's size changes", async () => {
 
   act(() => {
     const instance = ResizeObserverMock.getSingleInstance();
+
+    // To cover the empty case
     instance.observerCallback([], instance);
+
+    instance.observerCallback(
+      [{ contentRect: { width: 1000 } } as ResizeObserverEntry],
+      instance
+    );
+
+    // To cover the same width case
     instance.observerCallback(
       [{ contentRect: { width: 1000 } } as ResizeObserverEntry],
       instance

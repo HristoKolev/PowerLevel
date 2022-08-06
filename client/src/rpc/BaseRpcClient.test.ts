@@ -245,6 +245,16 @@ test('CSRF token is sent to the server', async () => {
   });
 });
 
+test('getCSRFToken returns the CSRF token', async () => {
+  const csrfToken = '[Token]';
+
+  const baseClient = new BaseRpcClient();
+
+  baseClient.setCSRFToken(csrfToken);
+
+  expect(baseClient.getCSRFToken()).toEqual(csrfToken);
+});
+
 test('send returns payload on success', async () => {
   const result: ApiResult<{ test: number }> = {
     isOk: true,

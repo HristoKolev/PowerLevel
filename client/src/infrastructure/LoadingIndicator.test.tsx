@@ -3,6 +3,12 @@ import { screen, waitFor } from '@testing-library/react';
 import { renderWithProviders } from '~infrastructure/test-utils';
 import { LoadingIndicator } from '~infrastructure/LoadingIndicator';
 
+afterEach(() => {
+  jest.resetAllMocks();
+  jest.restoreAllMocks();
+  jest.resetModules();
+});
+
 test('shows ui immediately if the delay is 0', async () => {
   renderWithProviders(<LoadingIndicator delay={0} />);
 
@@ -19,6 +25,16 @@ test('shows message', async () => {
 
 test('does not show indicator until the delay has passed', async () => {
   renderWithProviders(<LoadingIndicator delay={10} />);
+
+  expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument();
+
+  await waitFor(() => {
+    expect(screen.getByTestId('loading-indicator')).toBeInTheDocument();
+  });
+});
+
+test('applies default delay', async () => {
+  renderWithProviders(<LoadingIndicator />);
 
   expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument();
 

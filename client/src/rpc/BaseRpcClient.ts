@@ -49,6 +49,10 @@ export class BaseRpcClient {
     this.csrfToken = csrfToken;
   }
 
+  getCSRFToken() {
+    return this.csrfToken;
+  }
+
   clearCSRFToken() {
     this.csrfToken = undefined;
   }

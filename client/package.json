@@ -7,7 +7,7 @@
     "start": "cross-env NODE_ENV=development webpack --watch --config webpack.config.js",
     "start-pwa": "cross-env NODE_ENV=development PWA_DEV=true webpack --watch --config webpack.config.js",
     "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
-    "test": "cross-env NODE_ENV=test jest --passWithNoTests",
+    "test": "cross-env NODE_ENV=test jest",
     "lint": "eslint ./",
     "profile": "cross-env NODE_ENV=production webpack --profile --config webpack.config.js --json=./dist/profile.json && webpack-bundle-analyzer ./dist/profile.json",
     "postinstall": "replace-in-files --string='sourceMappingURL' --replacement='_' ./node_modules/browser-sync-client/dist/index.js"
