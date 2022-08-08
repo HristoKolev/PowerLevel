@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 import { RenderOptions, RenderResult, render } from '@testing-library/react';
 
 import { StoreType, createStore } from '~infrastructure/redux';
+import { RpcClient } from '~rpc/RpcClient';
 
 export function renderWithProviders(
   ui: ReactElement,
@@ -198,3 +199,32 @@ export class WaitHandle {
     });
   }
 }
+
+type RpcClientMockType = { [key in keyof RpcClient]: jest.Mock };
+
+export const RpcClientMock: RpcClientMockType = (() => {
+  const proxy = new Proxy(new Map<string, jest.Mock>(), {
+    get(map, key: string): jest.Mock {
+      if (!map.has(key)) {
+        map.set(key, jest.fn());
+      }
+      return map.get(key) as jest.Mock;
+    },
+  });
+
+  const result = class {
+    constructor() {
+      return proxy;
+    }
+  };
+
+  const keys = Reflect.ownKeys(RpcClient.prototype).filter(
+    (x) => x !== 'constructor'
+  );
+
+  for (const key of keys) {
+    Reflect.set(result, key, Reflect.get(proxy, key));
+  }
+
+  return result as unknown as RpcClientMockType;
+})();

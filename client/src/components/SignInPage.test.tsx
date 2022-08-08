@@ -4,8 +4,11 @@ import { useNavigate } from 'react-router-dom';
 
 import { createStore } from '~infrastructure/redux';
 import { apiResult, LoginResponse } from '~rpc';
-import { renderWithProviders, WaitHandle } from '~infrastructure/test-utils';
-import { createRpcClient } from '~infrastructure/create-rpc-client';
+import {
+  renderWithProviders,
+  WaitHandle,
+  RpcClientMock,
+} from '~infrastructure/test-utils';
 
 import { SignInPage } from './SignInPage';
 
@@ -15,21 +18,12 @@ jest.mock('~infrastructure/RecaptchaField', () => ({
   ),
 }));
 
-jest.mock('~infrastructure/create-rpc-client', () => {
-  const proxy = new Proxy(new Map<string, unknown>(), {
-    get(map, propName: string): unknown {
-      if (!map.has(propName)) {
-        map.set(propName, jest.fn());
-      }
-      return map.get(propName);
-    },
-  });
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return {
-    ...jest.requireActual('~infrastructure/create-rpc-client'),
-    createRpcClient: () => proxy,
-  };
-});
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+jest.mock('~rpc', () => ({
+  ...jest.requireActual('~rpc'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+  RpcClient: jest.requireActual('~infrastructure/test-utils').RpcClientMock,
+}));
 
 jest.mock('react-router-dom', () => {
   const navigate = jest.fn();
@@ -40,8 +34,6 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-// eslint-disable-next-line @typescript-eslint/unbound-method
-const loginResultMock = createRpcClient().loginResult as jest.Mock;
 // eslint-disable-next-line react-hooks/rules-of-hooks
 const navigateMock = useNavigate() as jest.Mock;
 
@@ -89,7 +81,7 @@ test('logs in successfully', async () => {
 
   const loginResultWaitHandle = new WaitHandle();
 
-  loginResultMock.mockImplementation(async () => {
+  RpcClientMock.loginResult.mockImplementation(async () => {
     await loginResultWaitHandle.wait();
     return apiResult.ok<LoginResponse>({
       csrfToken: '__TOKEN__',
@@ -100,7 +92,7 @@ test('logs in successfully', async () => {
 
   await user.click(await screen.findByTestId('submit-button'));
 
-  expect(loginResultMock).toHaveBeenCalledWith({
+  expect(RpcClientMock.loginResult).toHaveBeenCalledWith({
     emailAddress: 'test@test.test',
     password: 'password',
     rememberMe: true,
@@ -145,14 +137,14 @@ test('shows error message on request failure', async () => {
 
   const loginResultWaitHandle = new WaitHandle();
 
-  loginResultMock.mockImplementation(async () => {
+  RpcClientMock.loginResult.mockImplementation(async () => {
     await loginResultWaitHandle.wait();
     return apiResult.error({ errorMessages });
   });
 
   await user.click(await screen.findByTestId('submit-button'));
 
-  expect(loginResultMock).toHaveBeenCalledWith({
+  expect(RpcClientMock.loginResult).toHaveBeenCalledWith({
     emailAddress: 'test@test.test',
     password: 'password',
     rememberMe: true,

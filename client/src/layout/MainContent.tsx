@@ -33,7 +33,7 @@ export const MainContent = memo(
     const { open, breakpoint } = useAppSelector(layoutSelector);
     return (
       <main
-        className={`flex-grow p-3 ${mainContentClassName} ${
+        className={`flex-auto flex flex-col p-3 ${mainContentClassName} ${
           open ? 'drawer-open' : ''
         } ${
           breakpoint === ResponsiveDrawerBreakpoint.SideBySide
