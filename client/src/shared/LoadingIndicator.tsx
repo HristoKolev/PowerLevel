@@ -3,7 +3,7 @@ import { CircularProgress } from '@mui/material';
 
 const defaultDelay = 500;
 
-interface LoadingIndicatorProps {
+export interface LoadingIndicatorProps {
   delay?: number;
   message?: string;
 }

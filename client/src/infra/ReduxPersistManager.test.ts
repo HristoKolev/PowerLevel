@@ -1,6 +1,7 @@
 import { createSlice, configureStore } from '@reduxjs/toolkit';
 
-import { InMemoryStorage } from './test-utils';
+import { InMemoryStorage } from '~/test-utils';
+
 import { ReduxPersistManager } from './ReduxPersistManager';
 
 interface Slice1State {

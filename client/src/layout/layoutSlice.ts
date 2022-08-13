@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, Selector } from '@reduxjs/toolkit';
 
-import { RootState } from '~infrastructure/redux';
+import { ReduxState } from '~infra/redux';
 
 export enum ResponsiveDrawerBreakpoint {
   Overlaid = 900,
@@ -17,10 +17,6 @@ const initialState: LayoutState = {
   breakpoint: ResponsiveDrawerBreakpoint.Overlaid,
 };
 
-interface ChangeDrawerBreakpoint {
-  breakpoint: ResponsiveDrawerBreakpoint;
-}
-
 export const layoutSlice = createSlice({
   name: 'LAYOUT',
   initialState,
@@ -31,14 +27,14 @@ export const layoutSlice = createSlice({
     },
     changeDrawerBreakpoint(
       state,
-      { payload }: PayloadAction<ChangeDrawerBreakpoint>
+      { payload }: PayloadAction<ResponsiveDrawerBreakpoint>
     ) {
-      state.breakpoint = payload.breakpoint;
+      state.breakpoint = payload;
     },
   },
 });
 
-export const layoutSelector: Selector<RootState, LayoutState> = (state) =>
+export const layoutSelector: Selector<ReduxState, LayoutState> = (state) =>
   state[layoutSlice.name];
 
 export const layoutActions = layoutSlice.actions;

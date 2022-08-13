@@ -4,13 +4,16 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/setupTests.js'],
   testEnvironment: 'jsdom',
   testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)'],
+  moduleNameMapper: {
+    "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+  },
   collectCoverage: true,
   collectCoverageFrom: [
     '<rootDir>/src/**/*.{ts,tsx}',
     '!<rootDir>/src/index.tsx', // Entrypoint
     '!<rootDir>/src/service-worker.ts', // Entrypoint
-    '!<rootDir>/src/infrastructure/test-utils.tsx', // Test utilities, not production code
-    '!<rootDir>/src/rpc/RpcClient.ts', // Generated code
+    '!<rootDir>/src/test-utils.tsx', // Test utilities, not production code
+    '!<rootDir>/src/infra/RpcClient.ts', // Generated code
   ],
   coverageDirectory: 'coverage',
   coverageThreshold: {

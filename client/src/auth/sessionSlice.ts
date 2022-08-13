@@ -6,11 +6,16 @@ import {
   createAsyncThunk,
 } from '@reduxjs/toolkit';
 
-import { LoginResponse } from '~rpc';
-import { RootState } from '~infrastructure/redux';
-import { createRpcClient } from '~infrastructure/create-rpc-client';
+import { LoginResponse } from '~infra/RpcClient';
+import { createRpcClient } from '~infra/create-rpc-client';
+import { ReduxState } from '~infra/redux';
 
-const SESSION_SLICE_KEY = 'SESSION';
+const logout = createAsyncThunk(`SESSION/logout`, (_, { getState }) => {
+  const rpcClient = createRpcClient(getState());
+
+  // Ignore failed state
+  void rpcClient.logoutResult();
+});
 
 interface SessionState {
   loggedIn: boolean;
@@ -22,27 +27,13 @@ const initialState: SessionState = {
   userInfo: {} as LoginResponse,
 };
 
-const logout = createAsyncThunk(
-  `${SESSION_SLICE_KEY}/logout`,
-  async (_, { getState }) => {
-    const rpcClient = createRpcClient(getState());
-
-    // Ignore the failed state
-    void rpcClient.logoutResult();
-  }
-);
-
-interface LoginPayload {
-  loginResponse: LoginResponse;
-}
-
 export const sessionSlice = createSlice({
   name: 'SESSION',
   initialState,
   reducers: {
-    login(state, { payload }: PayloadAction<LoginPayload>) {
+    login(state, { payload }: PayloadAction<LoginResponse>) {
       state.loggedIn = true;
-      state.userInfo = payload.loginResponse;
+      state.userInfo = payload;
     },
   },
   extraReducers: {
@@ -53,7 +44,7 @@ export const sessionSlice = createSlice({
   },
 });
 
-const sessionStateSelector: Selector<RootState, SessionState> = (state) =>
+const sessionStateSelector: Selector<ReduxState, SessionState> = (state) =>
   state[sessionSlice.name];
 
 export const isLoggedInSelector = createSelector(

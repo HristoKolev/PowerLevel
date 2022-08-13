@@ -13,7 +13,7 @@ import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import { css } from '@linaria/core';
 
-import { useAppDispatch, useAppSelector } from '~infrastructure/redux';
+import { useAppDispatch, useAppSelector } from '~infra/redux';
 
 import { layoutActions, layoutSelector } from './layoutSlice';
 

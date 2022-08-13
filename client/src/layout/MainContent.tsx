@@ -1,7 +1,7 @@
 import { memo, ReactNode } from 'react';
 import { css } from '@linaria/core';
 
-import { useAppSelector } from '~infrastructure/redux';
+import { useAppSelector } from '~infra/redux';
 
 import { layoutSelector, ResponsiveDrawerBreakpoint } from './layoutSlice';
 
@@ -24,7 +24,7 @@ const mainContentClassName = css`
   }
 `;
 
-interface MainContentProps {
+export interface MainContentProps {
   children: ReactNode;
 }
 

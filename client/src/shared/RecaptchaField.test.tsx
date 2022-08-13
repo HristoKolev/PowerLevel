@@ -5,8 +5,9 @@ import ReCAPTCHA, { ReCAPTCHAProps } from 'react-google-recaptcha';
 import userEvent from '@testing-library/user-event';
 import { screen, act } from '@testing-library/react';
 
-import { renderWithProviders } from '~infrastructure/test-utils';
-import { RecaptchaField } from '~infrastructure/RecaptchaField';
+import { renderWithProviders } from '~test-utils';
+
+import { RecaptchaField } from './RecaptchaField';
 
 jest.mock('react-google-recaptcha', () => jest.fn(() => null));
 

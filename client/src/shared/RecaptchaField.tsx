@@ -2,7 +2,7 @@ import { memo, useCallback, CSSProperties } from 'react';
 import { useController, Control } from 'react-hook-form';
 import ReCAPTCHA from 'react-google-recaptcha';
 
-interface RecaptchaFieldProps {
+export interface RecaptchaFieldProps {
   name: string;
   control: unknown;
   className?: string;

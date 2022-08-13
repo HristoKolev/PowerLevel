@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react';
 
-import { App } from '~components/App';
-import { createStore } from '~infrastructure/redux';
-import { ResizeObserverMock } from '~infrastructure/test-utils';
+import { ResizeObserverMock, renderWithProviders } from '~test-utils';
+import { createReduxStore } from '~infra/redux';
+
+import { App, NotFoundPage } from './App';
 
 beforeAll(() => {
   ResizeObserverMock.enableMock();
@@ -20,11 +21,17 @@ afterEach(() => {
 });
 
 test('renders without error', async () => {
-  const store = createStore();
+  const store = createReduxStore();
 
   render(<App store={store} />);
 
   const brandName = await screen.findByTestId('brand-name');
 
   expect(brandName).toHaveTextContent('Power Level');
+});
+
+test('renders correct message', async () => {
+  renderWithProviders(<NotFoundPage />);
+
+  expect(screen.getByText('Not found')).toBeInTheDocument();
 });

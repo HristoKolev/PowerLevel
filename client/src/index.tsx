@@ -6,11 +6,11 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import './styles.css';
 
-import { createStore } from '~infrastructure/redux';
 import { App } from '~components/App';
-import { ReduxPersistManager } from '~infrastructure/ReduxPersistManager';
-import { layoutSlice } from '~layout';
-import { sessionSlice } from '~infrastructure/sessionSlice';
+import { sessionSlice } from '~auth/sessionSlice';
+import { ReduxPersistManager } from '~infra/ReduxPersistManager';
+import { layoutSlice } from '~layout/layoutSlice';
+import { createReduxStore } from '~infra/redux';
 
 declare global {
   interface Window {
@@ -29,7 +29,7 @@ if (window.__browserSupported) {
     [layoutSlice.name, sessionSlice.name]
   );
 
-  const store = createStore(reduxPersistManager.readPersistedState());
+  const store = createReduxStore(reduxPersistManager.readPersistedState());
 
   reduxPersistManager.subscribe(store);
 

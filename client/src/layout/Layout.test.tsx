@@ -1,13 +1,10 @@
 import { screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import {
-  ResizeObserverMock,
-  renderWithProviders,
-} from '~infrastructure/test-utils';
-import { createStore } from '~infrastructure/redux';
-import { ResponsiveDrawerBreakpoint } from '~layout/layoutSlice';
+import { ResizeObserverMock, renderWithProviders } from '~test-utils';
+import { createReduxStore } from '~infra/redux';
 
+import { ResponsiveDrawerBreakpoint } from './layoutSlice';
 import { Layout } from './Layout';
 
 beforeAll(() => {
@@ -90,7 +87,7 @@ test('drawer icon toggles the drawer', async () => {
 });
 
 test("breakpoint changes when the root element's size changes", async () => {
-  const store = createStore();
+  const store = createReduxStore();
 
   renderWithProviders(
     <Layout>

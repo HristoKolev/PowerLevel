@@ -26,7 +26,6 @@
     "react-hook-form": "^7",
     "react-redux": "^8",
     "react-router-dom": "^6",
-    "react-virtualized": "^9.22.3",
     "redux": "^4"
   },
   "devDependencies": {
@@ -45,7 +44,6 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/react-google-recaptcha": "^2",
-    "@types/react-virtualized": "^9.21.21",
     "@typescript-eslint/eslint-plugin": "^5",
     "@typescript-eslint/parser": "^5",
     "babel-loader": "^8",
@@ -77,6 +75,7 @@
     "html-loader": "^4",
     "html-webpack-plugin": "^5",
     "http-proxy-middleware": "^2",
+    "identity-obj-proxy": "^3",
     "jest": "^28",
     "jest-environment-jsdom": "^28",
     "mini-css-extract-plugin": "^2",

@@ -2,12 +2,13 @@ import { screen, waitFor, act } from '@testing-library/react';
 import { useNavigate } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 
-import { renderWithProviders } from '~infrastructure/test-utils';
-import { CustomAppBar } from '~layout/CustomAppBar';
-import { createStore, StoreType } from '~infrastructure/redux';
-import { sessionActions } from '~infrastructure/sessionSlice';
-import { createRpcClient } from '~infrastructure/create-rpc-client';
-import { apiResult } from '~rpc';
+import { renderWithProviders } from '~test-utils';
+import { createRpcClient } from '~infra/create-rpc-client';
+import { sessionActions } from '~auth/sessionSlice';
+import { apiResult } from '~infra/api-result';
+import { createReduxStore, ReduxStoreType } from '~infra/redux';
+
+import { CustomAppBar } from './CustomAppBar';
 
 jest.mock('react-router-dom', () => {
   const navigate = jest.fn();
@@ -18,7 +19,7 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-jest.mock('~infrastructure/create-rpc-client', () => {
+jest.mock('~infra/create-rpc-client', () => {
   const proxy = new Proxy(new Map<string, unknown>(), {
     get(map, propName: string): unknown {
       if (!map.has(propName)) {
@@ -29,7 +30,7 @@ jest.mock('~infrastructure/create-rpc-client', () => {
   });
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
-    ...jest.requireActual('~infrastructure/create-rpc-client'),
+    ...jest.requireActual('~infra/create-rpc-client'),
     createRpcClient: () => proxy,
   };
 });
@@ -40,15 +41,13 @@ const logoutResultMock = createRpcClient().logoutResult as jest.Mock;
 // eslint-disable-next-line react-hooks/rules-of-hooks
 const navigateMock = useNavigate() as jest.Mock;
 
-const loginUser = (store: StoreType) => {
+const loginUser = (store: ReduxStoreType) => {
   act(() => {
     store.dispatch(
       sessionActions.login({
-        loginResponse: {
-          csrfToken: '__TOKEN__',
-          emailAddress: 'test@test.test',
-          userProfileID: 1,
-        },
+        csrfToken: '__TOKEN__',
+        emailAddress: 'test@test.test',
+        userProfileID: 1,
       })
     );
   });
@@ -66,7 +65,7 @@ test('login buttons shows when user is not logged in', async () => {
 });
 
 test('login button does not show when the user is logged in', async () => {
-  const store = createStore();
+  const store = createReduxStore();
   renderWithProviders(<CustomAppBar />, store);
 
   loginUser(store);
@@ -79,7 +78,7 @@ test('login button does not show when the user is logged in', async () => {
 test('sign out button logs out the user', async () => {
   const user = userEvent.setup();
 
-  const store = createStore();
+  const store = createReduxStore();
 
   renderWithProviders(<CustomAppBar />, store);
 
@@ -102,7 +101,7 @@ test('sign out button logs out the user', async () => {
 test('sign out button logs out the user even if the server request failed', async () => {
   const user = userEvent.setup();
 
-  const store = createStore();
+  const store = createReduxStore();
 
   renderWithProviders(<CustomAppBar />, store);
 

@@ -1,6 +1,6 @@
 import { ReactNode, memo, useEffect } from 'react';
 
-import { useAppDispatch } from '~infrastructure/redux';
+import { useAppDispatch } from '~infra/redux';
 
 import { CustomAppBar } from './CustomAppBar';
 import { MenuDrawer } from './MenuDrawer';
@@ -8,7 +8,7 @@ import { MainContent } from './MainContent';
 import { createDrawerResizeObserver } from './createDrawerResizeObserver';
 import { layoutActions } from './layoutSlice';
 
-interface LayoutProps {
+export interface LayoutProps {
   children: ReactNode;
 }
 
@@ -18,12 +18,12 @@ export const Layout = memo(({ children }: LayoutProps): JSX.Element => {
   useEffect(() => {
     const root = document.getElementById('root') as Element;
 
-    const observer = createDrawerResizeObserver(root, (breakpoint) => {
-      dispatch(layoutActions.changeDrawerBreakpoint({ breakpoint }));
+    const drawerObserver = createDrawerResizeObserver(root, (breakpoint) => {
+      dispatch(layoutActions.changeDrawerBreakpoint(breakpoint));
     });
 
     return () => {
-      observer.disconnect();
+      drawerObserver.disconnect();
     };
   }, [dispatch]);
 

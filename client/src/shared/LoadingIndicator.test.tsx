@@ -1,7 +1,8 @@
 import { screen, waitFor } from '@testing-library/react';
 
-import { renderWithProviders } from '~infrastructure/test-utils';
-import { LoadingIndicator } from '~infrastructure/LoadingIndicator';
+import { renderWithProviders } from '~test-utils';
+
+import { LoadingIndicator } from './LoadingIndicator';
 
 afterEach(() => {
   jest.resetAllMocks();

@@ -4,11 +4,8 @@ import { css } from '@linaria/core';
 import { IconButton, Toolbar, AppBar, Button } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 
-import { useAppDispatch, useAppSelector } from '~infrastructure/redux';
-import {
-  isLoggedInSelector,
-  sessionThunks,
-} from '~infrastructure/sessionSlice';
+import { useAppDispatch, useAppSelector } from '~infra/redux';
+import { isLoggedInSelector, sessionThunks } from '~auth/sessionSlice';
 
 import {
   layoutActions,

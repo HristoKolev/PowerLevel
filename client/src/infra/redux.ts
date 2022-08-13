@@ -1,11 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
-import { layoutSlice } from '~layout';
+import { layoutSlice } from '~layout/layoutSlice';
+import { sessionSlice } from '~auth/sessionSlice';
 
-import { sessionSlice } from './sessionSlice';
-
-export const createStore = (preloadedState?: unknown) =>
+export const createReduxStore = (preloadedState?: unknown) =>
   configureStore({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-explicit-any
     preloadedState: preloadedState as any,
@@ -16,11 +15,13 @@ export const createStore = (preloadedState?: unknown) =>
   });
 
 // TODO: rename these interfaces
-export type StoreType = ReturnType<typeof createStore>;
+export type ReduxStoreType = ReturnType<typeof createReduxStore>;
 
-export type RootState = ReturnType<ReturnType<typeof createStore>['getState']>;
+export type ReduxState = ReturnType<
+  ReturnType<typeof createReduxStore>['getState']
+>;
 
 export const useAppDispatch = () =>
-  useDispatch<ReturnType<typeof createStore>['dispatch']>();
+  useDispatch<ReturnType<typeof createReduxStore>['dispatch']>();
 
-export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+export const useAppSelector: TypedUseSelectorHook<ReduxState> = useSelector;

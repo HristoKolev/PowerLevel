@@ -17,19 +17,15 @@ import {
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import {
-  ApiResult,
-  LoginResponse,
-  LoginError,
-  LoginRequest,
-  rpcValidations,
-} from '~rpc';
-import { RecaptchaField } from '~infrastructure/RecaptchaField';
-import { breakpoints } from '~infrastructure/helpers';
-import { LoadingIndicator } from '~infrastructure/LoadingIndicator';
-import { sessionActions } from '~infrastructure/sessionSlice';
-import { useAppDispatch } from '~infrastructure/redux';
-import { createRpcClient } from '~infrastructure/create-rpc-client';
+import { breakpoints } from '~infra/helpers';
+import { rpcValidations } from '~infra/rpc-validations';
+import { useAppDispatch } from '~infra/redux';
+import { ApiResult } from '~infra/api-result';
+import { LoginRequest, LoginResponse, LoginError } from '~infra/RpcClient';
+import { sessionActions } from '~auth/sessionSlice';
+import { RecaptchaField } from '~shared/RecaptchaField';
+import { LoadingIndicator } from '~shared/LoadingIndicator';
+import { createRpcClient } from '~infra/create-rpc-client';
 
 const signInPageClassName = css`
   form {
@@ -70,7 +66,7 @@ export const SignInPage = memo((): JSX.Element => {
       setSubmitLoading(false);
 
       if (result.isOk) {
-        dispatch(sessionActions.login({ loginResponse: result.payload }));
+        dispatch(sessionActions.login(result.payload));
         navigate('/');
       }
     },

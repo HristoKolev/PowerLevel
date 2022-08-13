@@ -1,8 +1,9 @@
 import { act } from '@testing-library/react';
 
-import { createStore, StoreType } from '~infrastructure/redux';
-import { sessionActions } from '~infrastructure/sessionSlice';
-import { BaseRpcClient, RpcClient } from '~rpc';
+import { createReduxStore, ReduxStoreType } from '~infra/redux';
+import { BaseRpcClient } from '~infra/BaseRpcClient';
+import { sessionActions } from '~auth/sessionSlice';
+import { RpcClient } from '~infra/RpcClient';
 
 import { createRpcClient } from './create-rpc-client';
 
@@ -18,22 +19,20 @@ const getCSRFToken = (rpcClient: RpcClient) => {
   return baseClient.getCSRFToken();
 };
 
-const loginUser = (store: StoreType, csrfToken: string) => {
+const loginUser = (store: ReduxStoreType, csrfToken: string) => {
   act(() => {
     store.dispatch(
       sessionActions.login({
-        loginResponse: {
-          csrfToken,
-          emailAddress: 'test@test.test',
-          userProfileID: 1,
-        },
+        csrfToken,
+        emailAddress: 'test@test.test',
+        userProfileID: 1,
       })
     );
   });
 };
 
 test('token is present when called with root state and user is logged in', async () => {
-  const store = createStore();
+  const store = createReduxStore();
 
   const testToken = '__TOKEN__';
 
@@ -45,7 +44,7 @@ test('token is present when called with root state and user is logged in', async
 });
 
 test('token is not present when called with root state and user is logged out', async () => {
-  const store = createStore();
+  const store = createReduxStore();
 
   const rpcClient = createRpcClient(store.getState());
 
@@ -53,7 +52,7 @@ test('token is not present when called with root state and user is logged out', 
 });
 
 test('token is present when called with token directly', async () => {
-  const store = createStore();
+  const store = createReduxStore();
 
   const testToken = '__TOKEN__';
 
