@@ -3,12 +3,42 @@ import { useNavigate } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 
 import { renderWithProviders } from '~test-utils';
-import { createRpcClient } from '~infra/create-rpc-client';
 import { sessionActions } from '~auth/sessionSlice';
 import { apiResult } from '~infra/api-result';
 import { createReduxStore, ReduxStoreType } from '~infra/redux';
+import { RpcClient } from '~infra/RpcClient';
 
 import { CustomAppBar } from './CustomAppBar';
+
+type RpcClientMockType = { [key in keyof RpcClient]: jest.Mock };
+
+jest.mock('~infra/RpcClient', () => {
+  const MockedRpcClient: RpcClientMockType = (() => {
+    const map = new Map<string, jest.Mock>();
+    const proxy: RpcClientMockType = new Proxy(
+      function () {} as unknown as RpcClientMockType,
+      {
+        construct() {
+          return proxy;
+        },
+        get(_, key: string): jest.Mock {
+          if (!map.has(key)) {
+            map.set(key, jest.fn());
+          }
+          return map.get(key) as jest.Mock;
+        },
+      }
+    );
+    return proxy;
+  })();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return {
+    ...jest.requireActual('~infra/RpcClient'),
+    RpcClient: MockedRpcClient,
+  };
+});
+
+const RpcClientMock = RpcClient as unknown as RpcClientMockType;
 
 jest.mock('react-router-dom', () => {
   const navigate = jest.fn();
@@ -18,25 +48,6 @@ jest.mock('react-router-dom', () => {
     useNavigate: () => navigate,
   };
 });
-
-jest.mock('~infra/create-rpc-client', () => {
-  const proxy = new Proxy(new Map<string, unknown>(), {
-    get(map, propName: string): unknown {
-      if (!map.has(propName)) {
-        map.set(propName, jest.fn());
-      }
-      return map.get(propName);
-    },
-  });
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return {
-    ...jest.requireActual('~infra/create-rpc-client'),
-    createRpcClient: () => proxy,
-  };
-});
-
-// eslint-disable-next-line @typescript-eslint/unbound-method
-const logoutResultMock = createRpcClient().logoutResult as jest.Mock;
 
 // eslint-disable-next-line react-hooks/rules-of-hooks
 const navigateMock = useNavigate() as jest.Mock;
@@ -84,7 +95,7 @@ test('sign out button logs out the user', async () => {
 
   loginUser(store);
 
-  logoutResultMock.mockImplementation(() => apiResult.ok<null>(null));
+  RpcClientMock.logoutResult.mockImplementation(() => apiResult.ok<null>(null));
 
   await user.click(await screen.findByTestId('sign-out-button'));
 
@@ -107,7 +118,7 @@ test('sign out button logs out the user even if the server request failed', asyn
 
   loginUser(store);
 
-  logoutResultMock.mockImplementation(() =>
+  RpcClientMock.logoutResult.mockImplementation(() =>
     apiResult.error({ errorMessages: ['Failed to logout user.'] })
   );
 
