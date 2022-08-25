@@ -45,6 +45,7 @@ public class HttpServerIoCModule : Module
         builder.RegisterType<RpcInputValidationMiddleware>().InstancePerLifetimeScope();
         builder.RegisterType<DateTimeServiceImpl>().As<DateTimeService>().InstancePerLifetimeScope();
         builder.RegisterType<RngServiceImpl>().As<RngService>().InstancePerLifetimeScope();
+        builder.RegisterType<QuizServiceImpl>().As<QuizService>().InstancePerLifetimeScope();
 
         // Always create
         var handlerClasses = this.app.RpcEngine.Metadata.Select(x => x.DeclaringType).Distinct().ToList();
