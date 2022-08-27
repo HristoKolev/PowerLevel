@@ -18,12 +18,12 @@ public class Program
 
         await File.WriteAllTextAsync(Path.Combine(
             Path.GetDirectoryName(typeof(Program).Assembly.Location)!,
-            "../../../../../client/src/rpc/RpcClient.ts"
+            "../../../../../client/src/infra/RpcClient.ts"
         ), TypeScriptCodeGenerator.Generate(engine.Metadata));
 
         await File.WriteAllTextAsync(Path.Combine(
             Path.GetDirectoryName(typeof(Program).Assembly.Location)!,
-            "../../../../../client/src/rpc/rpc-validations.ts"
+            "../../../../../client/src/infra/rpc-validations.ts"
         ), TypeScriptCodeGenerator.GenerateValidations(engine.Metadata));
     }
 }

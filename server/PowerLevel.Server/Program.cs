@@ -1,4 +1,3 @@
-namespace PowerLevel.Server;
 
 using System;
 using System.Collections.Generic;
@@ -6,15 +5,16 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Auth;
+using PowerLevel.Server.Auth;
 using Autofac;
-using Infrastructure;
+using PowerLevel.Server.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Xdxd.DotNet.Http;
 using Xdxd.DotNet.Logging;
 using Xdxd.DotNet.Rpc;
 using Xdxd.DotNet.Shared;
 
+namespace PowerLevel.Server;
 public class HttpServerApp : IAsyncDisposable
 {
     public readonly string AppVersion = typeof(HttpServerApp).Assembly.GetName().Version?.ToString();
@@ -81,6 +81,7 @@ public class HttpServerApp : IAsyncDisposable
         this.RpcEngine = new RpcEngine(RpcEngineOptions);
 
         var builder = new ContainerBuilder();
+
         builder.RegisterModule(new HttpServerIoCModule(this));
 
         if (this.InjectedIoCModule != null)

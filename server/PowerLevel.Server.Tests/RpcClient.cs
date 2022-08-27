@@ -9,6 +9,11 @@ public abstract class RpcClient
     protected abstract Task<ApiResult<TResponse>> RpcExecute<TRequest, TResponse>(TRequest request)
         where TRequest : class where TResponse : class;
 
+    public virtual Task<ApiResult<ListQuizzesResponse>> ListQuizzes(ListQuizzesRequest request)
+    {
+        return this.RpcExecute<ListQuizzesRequest, ListQuizzesResponse>(request);
+    }
+
     public virtual Task<ApiResult<LoginResponse>> Login(LoginRequest request)
     {
         return this.RpcExecute<LoginRequest, LoginResponse>(request);

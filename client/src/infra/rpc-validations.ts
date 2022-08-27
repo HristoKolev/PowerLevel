@@ -3,6 +3,9 @@
 import { validations, mergeValidations } from './validations';
 
 export const rpcValidations = {
+  listQuizzesRequest: {
+    query: {},
+  },
   loginRequest: {
     emailAddress: mergeValidations([ validations.required('The email address field is required.') ]),
     password: mergeValidations([ validations.required('The password field is required.') ]),

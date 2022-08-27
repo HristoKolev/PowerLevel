@@ -44,9 +44,9 @@ public interface QuizService
 
 public class QuizServiceImpl : QuizService
 {
-    private readonly DbService db;
+    private readonly IDbService db;
 
-    public QuizServiceImpl(DbService db)
+    public QuizServiceImpl(IDbService db)
     {
         this.db = db;
     }

@@ -3,6 +3,10 @@
 import { BaseRpcClient } from './BaseRpcClient';
 import { ApiResult } from './api-result';
 
+export interface ListQuizzesRequest {
+  query: string;
+}
+
 export interface LoginRequest {
   emailAddress: string;
   password: string;
@@ -18,6 +22,15 @@ export interface RegisterRequest {
   emailAddress: string;
   password: string;
   recaptchaToken: string;
+}
+
+export interface ListQuizzesResponse {
+  items: QuizPoco[];
+}
+
+export interface QuizPoco {
+  quizID: number;
+  quizName: string;
 }
 
 export interface LoginResponse {
@@ -50,6 +63,14 @@ export class RpcClient {
 
   constructor(baseClient: BaseRpcClient) {
     this.baseClient = baseClient;
+  }
+
+  listQuizzes(request: ListQuizzesRequest): Promise<ListQuizzesResponse> {
+    return this.baseClient.send('ListQuizzesRequest', request);
+  }
+
+  listQuizzesResult(request: ListQuizzesRequest): Promise<ApiResult<ListQuizzesResponse>> {
+    return this.baseClient.sendResult('ListQuizzesRequest', request);
   }
 
   login(request: LoginRequest): Promise<LoginResponse> {
