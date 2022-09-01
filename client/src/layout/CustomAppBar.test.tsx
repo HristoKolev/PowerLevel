@@ -100,9 +100,9 @@ test('sign out button logs out the user', async () => {
   await user.click(await screen.findByTestId('sign-out-button'));
 
   expect(store.getState().SESSION).toMatchInlineSnapshot(`
-    Object {
+    {
       "loggedIn": false,
-      "userInfo": Object {},
+      "userInfo": {},
     }
   `);
 
@@ -125,9 +125,9 @@ test('sign out button logs out the user even if the server request failed', asyn
   await user.click(await screen.findByTestId('sign-out-button'));
 
   expect(store.getState().SESSION).toMatchInlineSnapshot(`
-    Object {
+    {
       "loggedIn": false,
-      "userInfo": Object {},
+      "userInfo": {},
     }
   `);
 

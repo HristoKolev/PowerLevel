@@ -28,15 +28,15 @@ test('sendResult returns error result on falsy requestType', async () => {
   const baseClient = new BaseRpcClient();
   const result = await baseClient.sendResult(null as unknown as string);
   expect(result).toMatchInlineSnapshot(`
-      Object {
-        "error": Object {
-          "errorMessages": Array [
-            "Rpc client error: requestType is falsy.",
-          ],
-        },
-        "isOk": false,
-      }
-    `);
+    {
+      "error": {
+        "errorMessages": [
+          "Rpc client error: requestType is falsy.",
+        ],
+      },
+      "isOk": false,
+    }
+  `);
   expect(consoleErrorMock).toHaveBeenCalled();
 });
 
@@ -49,15 +49,15 @@ test('sendResult returns error result on serialization error', async () => {
   const result = await baseClient.sendResult('TestRequest');
 
   expect(result).toMatchInlineSnapshot(`
-      Object {
-        "error": Object {
-          "errorMessages": Array [
-            "Rpc client error: failed to serialize request body.",
-          ],
-        },
-        "isOk": false,
-      }
-    `);
+    {
+      "error": {
+        "errorMessages": [
+          "Rpc client error: failed to serialize request body.",
+        ],
+      },
+      "isOk": false,
+    }
+  `);
 
   expect(consoleErrorMock).toHaveBeenCalled();
 });
@@ -71,15 +71,15 @@ test('sendResult returns error result on fetch error', async () => {
   const result = await baseClient.sendResult('TestRequest');
 
   expect(result).toMatchInlineSnapshot(`
-      Object {
-        "error": Object {
-          "errorMessages": Array [
-            "Network error.",
-          ],
-        },
-        "isOk": false,
-      }
-    `);
+    {
+      "error": {
+        "errorMessages": [
+          "Network error.",
+        ],
+      },
+      "isOk": false,
+    }
+  `);
 
   expect(consoleErrorMock).toHaveBeenCalled();
 });
@@ -91,15 +91,15 @@ test('sendResult returns error result on non 200 status code', async () => {
   const result = await baseClient.sendResult('TestRequest');
 
   expect(result).toMatchInlineSnapshot(`
-      Object {
-        "error": Object {
-          "errorMessages": Array [
-            "An error occurred on the server.",
-          ],
-        },
-        "isOk": false,
-      }
-    `);
+    {
+      "error": {
+        "errorMessages": [
+          "An error occurred on the server.",
+        ],
+      },
+      "isOk": false,
+    }
+  `);
 });
 
 test('sendResult returns error result on failure to read the response', async () => {
@@ -116,15 +116,15 @@ test('sendResult returns error result on failure to read the response', async ()
   const result = await baseClient.sendResult('TestRequest');
 
   expect(result).toMatchInlineSnapshot(`
-      Object {
-        "error": Object {
-          "errorMessages": Array [
-            "Rpc client error: failed to read response body.",
-          ],
-        },
-        "isOk": false,
-      }
-    `);
+    {
+      "error": {
+        "errorMessages": [
+          "Rpc client error: failed to read response body.",
+        ],
+      },
+      "isOk": false,
+    }
+  `);
 
   expect(consoleErrorMock).toHaveBeenCalled();
 });
@@ -145,15 +145,15 @@ test('sendResult returns error result on failure to parse the response', async (
   const result = await baseClient.sendResult('TestRequest');
 
   expect(result).toMatchInlineSnapshot(`
-      Object {
-        "error": Object {
-          "errorMessages": Array [
-            "Rpc client error: failed to deserialize response body.",
-          ],
-        },
-        "isOk": false,
-      }
-    `);
+    {
+      "error": {
+        "errorMessages": [
+          "Rpc client error: failed to deserialize response body.",
+        ],
+      },
+      "isOk": false,
+    }
+  `);
 
   expect(consoleErrorMock).toHaveBeenCalled();
 });

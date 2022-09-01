@@ -65,9 +65,7 @@ test('readPersistedState returns an empty object when storage location is empty'
     ['slice1']
   );
 
-  expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(
-    `Object {}`
-  );
+  expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(`{}`);
 });
 
 test('readPersistedState returns correct value when persisted state is available', async () => {
@@ -80,12 +78,12 @@ test('readPersistedState returns correct value when persisted state is available
   storage.setItem(STORAGE_KEY, JSON.stringify({ slice1: { value: true } }));
 
   expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(`
-      Object {
-        "slice1": Object {
-          "value": true,
-        },
-      }
-    `);
+    {
+      "slice1": {
+        "value": true,
+      },
+    }
+  `);
 });
 
 test('readPersistedState returns and empty object when storage throws an error', async () => {
@@ -96,9 +94,7 @@ test('readPersistedState returns and empty object when storage throws an error',
     'slice1',
   ]);
 
-  expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(
-    `Object {}`
-  );
+  expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(`{}`);
 });
 
 test('readPersistedState only returns fields that have been specified', async () => {
@@ -117,12 +113,12 @@ test('readPersistedState only returns fields that have been specified', async ()
   );
 
   expect(reduxPersistManager.readPersistedState()).toMatchInlineSnapshot(`
-      Object {
-        "slice1": Object {
-          "value": true,
-        },
-      }
-    `);
+    {
+      "slice1": {
+        "value": true,
+      },
+    }
+  `);
 });
 
 test('subscribe subscribes on state changes and saves the specified fields to given storage', async () => {
@@ -142,23 +138,23 @@ test('subscribe subscribes on state changes and saves the specified fields to gi
 
   expect(JSON.parse(storage.getItem(STORAGE_KEY) as string))
     .toMatchInlineSnapshot(`
-      Object {
-        "slice1": Object {
-          "value": true,
-        },
-      }
-    `);
+    {
+      "slice1": {
+        "value": true,
+      },
+    }
+  `);
 
   store.dispatch(slice1.actions.toggleState());
 
   expect(JSON.parse(storage.getItem(STORAGE_KEY) as string))
     .toMatchInlineSnapshot(`
-      Object {
-        "slice1": Object {
-          "value": false,
-        },
-      }
-    `);
+    {
+      "slice1": {
+        "value": false,
+      },
+    }
+  `);
 });
 
 test('storage is not updated when non persistent state is changed', async () => {
@@ -173,12 +169,12 @@ test('storage is not updated when non persistent state is changed', async () => 
   const persistedState = reduxPersistManager.readPersistedState();
 
   expect(persistedState).toMatchInlineSnapshot(`
-      Object {
-        "slice1": Object {
-          "value": false,
-        },
-      }
-    `);
+    {
+      "slice1": {
+        "value": false,
+      },
+    }
+  `);
 
   const store = createTestStore(persistedState);
 
@@ -206,12 +202,12 @@ test('storage is not updated after unsubscribe is called', async () => {
   const persistedState = reduxPersistManager.readPersistedState();
 
   expect(persistedState).toMatchInlineSnapshot(`
-      Object {
-        "slice1": Object {
-          "value": false,
-        },
-      }
-    `);
+    {
+      "slice1": {
+        "value": false,
+      },
+    }
+  `);
 
   const store = createTestStore(persistedState);
 
@@ -221,12 +217,12 @@ test('storage is not updated after unsubscribe is called', async () => {
 
   expect(JSON.parse(storage.getItem(STORAGE_KEY) as string))
     .toMatchInlineSnapshot(`
-      Object {
-        "slice1": Object {
-          "value": true,
-        },
-      }
-    `);
+    {
+      "slice1": {
+        "value": true,
+      },
+    }
+  `);
 
   storage.setItem = jest.fn();
 
