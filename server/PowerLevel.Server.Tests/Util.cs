@@ -46,9 +46,9 @@ public class HttpServerAppTest : AppDatabaseTest
 
     protected virtual void ConfigureMocks(ContainerBuilder builder) { }
 
-    protected async Task<LoginResponse> CreateProfile()
+    protected async Task<AuthHandler.LoginResponse> CreateProfile()
     {
-        var registerResult = await this.RpcClient.Register(new RegisterRequest
+        var registerResult = await this.RpcClient.Register(new AuthHandler.RegisterRequest
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
@@ -60,7 +60,7 @@ public class HttpServerAppTest : AppDatabaseTest
             throw new DetailedException("The `RegisterRequest` call failed.");
         }
 
-        var loginResult = await this.RpcClient.Login(new LoginRequest
+        var loginResult = await this.RpcClient.Login(new AuthHandler.LoginRequest
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
@@ -194,7 +194,7 @@ public class TestRpcClient : RpcClient
 
         var result = JsonHelper.Deserialize<ApiResult<TResponse>>(responseBody);
 
-        if (result.Payload is LoginResponse loginResponse)
+        if (result.Payload is AuthHandler.LoginResponse loginResponse)
         {
             this.CsrfToken = loginResponse.CsrfToken;
         }

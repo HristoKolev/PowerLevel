@@ -60,7 +60,7 @@ public class HttpServerAppTestRespondsToRequest : HttpServerAppTest
             BaseAddress = new Uri(this.App.GetAddress()),
         };
 
-        var response = await client.PostAsync($"/rpc/{nameof(PingRequest)}", new StringContent("{}"));
+        var response = await client.PostAsync($"/rpc/{nameof(PingHandler.PingRequest)}", new StringContent("{}"));
         response.EnsureSuccessStatusCode();
         string responseBody = await response.Content.ReadAsStringAsync();
 

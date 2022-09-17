@@ -9,7 +9,7 @@ public class PingHandlerTest : HttpServerAppTest
     [Fact]
     public async Task Ping_returns_correct_result()
     {
-        var result = await this.RpcClient.Ping(new PingRequest());
+        var result = await this.RpcClient.Ping(new PingHandler.PingRequest());
 
         Snapshot.Match(result);
     }

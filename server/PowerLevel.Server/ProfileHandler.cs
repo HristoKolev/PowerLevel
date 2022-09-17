@@ -5,6 +5,16 @@ using Xdxd.DotNet.Rpc;
 
 public class ProfileHandler
 {
+    public class ProfileInfoRequest
+    {
+        public int Count { get; set; }
+    }
+
+    public class ProfileInfoResponse
+    {
+        public int Count { get; set; }
+    }
+
     [RpcBind(typeof(ProfileInfoRequest), typeof(ProfileInfoResponse))]
     public async Task<ProfileInfoResponse> ProfileInfo(ProfileInfoRequest req)
     {
@@ -14,14 +24,4 @@ public class ProfileHandler
             Count = req.Count + 1,
         };
     }
-}
-
-public class ProfileInfoRequest
-{
-    public int Count { get; set; }
-}
-
-public class ProfileInfoResponse
-{
-    public int Count { get; set; }
 }

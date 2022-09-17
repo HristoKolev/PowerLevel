@@ -3,8 +3,12 @@
 import { BaseRpcClient } from './BaseRpcClient';
 import { ApiResult } from './api-result';
 
-export interface ListQuizzesRequest {
-  query: string;
+export interface DeleteQuizRequest {
+  id: number;
+}
+
+export interface GetQuizRequest {
+  id: number;
 }
 
 export interface LoginRequest {
@@ -24,13 +28,40 @@ export interface RegisterRequest {
   recaptchaToken: string;
 }
 
-export interface ListQuizzesResponse {
-  items: QuizPoco[];
+export interface SaveQuizRequest {
+  item: QuizModel;
 }
 
-export interface QuizPoco {
+export interface QuizModel {
+  questions: QuizQuestionModel[];
   quizID: number;
   quizName: string;
+  userProfileID: number;
+}
+
+export interface QuizQuestionModel {
+  answers: QuizAnswerPoco[];
+  questionContent: string;
+  questionID: number;
+  questionName: string;
+  questionPosition: number;
+  quizID: number;
+}
+
+export interface QuizAnswerPoco {
+  answerContent: string;
+  answerID: number;
+  answerIsCorrect: boolean;
+  answerPosition: number;
+  questionID: number;
+}
+
+export interface SearchQuizzesRequest {
+  query: string;
+}
+
+export interface GetQuizResponse {
+  item: QuizModel;
 }
 
 export interface LoginResponse {
@@ -47,13 +78,23 @@ export interface ProfileInfoResponse {
   count: number;
 }
 
-export interface LoginError {
-  userNotVerified?: boolean;
+export interface SearchQuizzesResponse {
+  items: QuizPoco[];
+}
+
+export interface QuizPoco {
+  quizID: number;
+  quizName: string;
+  userProfileID: number;
+}
+
+export interface DefaultApiError {
   errorMessages: string[];
   errorID?: string;
 }
 
-export interface DefaultApiError {
+export interface LoginError {
+  userNotVerified?: boolean;
   errorMessages: string[];
   errorID?: string;
 }
@@ -65,12 +106,20 @@ export class RpcClient {
     this.baseClient = baseClient;
   }
 
-  listQuizzes(request: ListQuizzesRequest): Promise<ListQuizzesResponse> {
-    return this.baseClient.send('ListQuizzesRequest', request);
+  deleteQuiz(request: DeleteQuizRequest): Promise<void> {
+    return this.baseClient.send('DeleteQuizRequest', request);
   }
 
-  listQuizzesResult(request: ListQuizzesRequest): Promise<ApiResult<ListQuizzesResponse>> {
-    return this.baseClient.sendResult('ListQuizzesRequest', request);
+  deleteQuizResult(request: DeleteQuizRequest): Promise<ApiResult> {
+    return this.baseClient.sendResult('DeleteQuizRequest', request);
+  }
+
+  getQuiz(request: GetQuizRequest): Promise<GetQuizResponse> {
+    return this.baseClient.send('GetQuizRequest', request);
+  }
+
+  getQuizResult(request: GetQuizRequest): Promise<ApiResult<GetQuizResponse>> {
+    return this.baseClient.sendResult('GetQuizRequest', request);
   }
 
   login(request: LoginRequest): Promise<LoginResponse> {
@@ -111,5 +160,21 @@ export class RpcClient {
 
   registerResult(request: RegisterRequest): Promise<ApiResult> {
     return this.baseClient.sendResult('RegisterRequest', request);
+  }
+
+  saveQuiz(request: SaveQuizRequest): Promise<void> {
+    return this.baseClient.send('SaveQuizRequest', request);
+  }
+
+  saveQuizResult(request: SaveQuizRequest): Promise<ApiResult> {
+    return this.baseClient.sendResult('SaveQuizRequest', request);
+  }
+
+  searchQuizzes(request: SearchQuizzesRequest): Promise<SearchQuizzesResponse> {
+    return this.baseClient.send('SearchQuizzesRequest', request);
+  }
+
+  searchQuizzesResult(request: SearchQuizzesRequest): Promise<ApiResult<SearchQuizzesResponse>> {
+    return this.baseClient.sendResult('SearchQuizzesRequest', request);
   }
 }

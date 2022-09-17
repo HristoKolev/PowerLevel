@@ -9,33 +9,48 @@ public abstract class RpcClient
     protected abstract Task<ApiResult<TResponse>> RpcExecute<TRequest, TResponse>(TRequest request)
         where TRequest : class where TResponse : class;
 
-    public virtual Task<ApiResult<ListQuizzesResponse>> ListQuizzes(ListQuizzesRequest request)
+    public virtual Task<ApiResult<QuizHandler.DeleteQuizResponse>> DeleteQuiz(QuizHandler.DeleteQuizRequest request)
     {
-        return this.RpcExecute<ListQuizzesRequest, ListQuizzesResponse>(request);
+        return this.RpcExecute<QuizHandler.DeleteQuizRequest, QuizHandler.DeleteQuizResponse>(request);
     }
 
-    public virtual Task<ApiResult<LoginResponse>> Login(LoginRequest request)
+    public virtual Task<ApiResult<QuizHandler.GetQuizResponse>> GetQuiz(QuizHandler.GetQuizRequest request)
     {
-        return this.RpcExecute<LoginRequest, LoginResponse>(request);
+        return this.RpcExecute<QuizHandler.GetQuizRequest, QuizHandler.GetQuizResponse>(request);
     }
 
-    public virtual Task<ApiResult<LogoutResponse>> Logout(LogoutRequest request)
+    public virtual Task<ApiResult<AuthHandler.LoginResponse>> Login(AuthHandler.LoginRequest request)
     {
-        return this.RpcExecute<LogoutRequest, LogoutResponse>(request);
+        return this.RpcExecute<AuthHandler.LoginRequest, AuthHandler.LoginResponse>(request);
     }
 
-    public virtual Task<ApiResult<PingResponse>> Ping(PingRequest request)
+    public virtual Task<ApiResult<AuthHandler.LogoutResponse>> Logout(AuthHandler.LogoutRequest request)
     {
-        return this.RpcExecute<PingRequest, PingResponse>(request);
+        return this.RpcExecute<AuthHandler.LogoutRequest, AuthHandler.LogoutResponse>(request);
     }
 
-    public virtual Task<ApiResult<ProfileInfoResponse>> ProfileInfo(ProfileInfoRequest request)
+    public virtual Task<ApiResult<PingHandler.PingResponse>> Ping(PingHandler.PingRequest request)
     {
-        return this.RpcExecute<ProfileInfoRequest, ProfileInfoResponse>(request);
+        return this.RpcExecute<PingHandler.PingRequest, PingHandler.PingResponse>(request);
     }
 
-    public virtual Task<ApiResult<RegisterResponse>> Register(RegisterRequest request)
+    public virtual Task<ApiResult<ProfileHandler.ProfileInfoResponse>> ProfileInfo(ProfileHandler.ProfileInfoRequest request)
     {
-        return this.RpcExecute<RegisterRequest, RegisterResponse>(request);
+        return this.RpcExecute<ProfileHandler.ProfileInfoRequest, ProfileHandler.ProfileInfoResponse>(request);
+    }
+
+    public virtual Task<ApiResult<AuthHandler.RegisterResponse>> Register(AuthHandler.RegisterRequest request)
+    {
+        return this.RpcExecute<AuthHandler.RegisterRequest, AuthHandler.RegisterResponse>(request);
+    }
+
+    public virtual Task<ApiResult<QuizHandler.SaveQuizResponse>> SaveQuiz(QuizHandler.SaveQuizRequest request)
+    {
+        return this.RpcExecute<QuizHandler.SaveQuizRequest, QuizHandler.SaveQuizResponse>(request);
+    }
+
+    public virtual Task<ApiResult<QuizHandler.SearchQuizzesResponse>> SearchQuizzes(QuizHandler.SearchQuizzesRequest request)
+    {
+        return this.RpcExecute<QuizHandler.SearchQuizzesRequest, QuizHandler.SearchQuizzesResponse>(request);
     }
 }

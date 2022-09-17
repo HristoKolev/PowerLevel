@@ -22,9 +22,9 @@ public static class CSharpCodeGenerator
 
     public static string Generate(List<RpcRequestMetadata> metadata)
     {
-        var methods = metadata.Select(x => $"    public virtual Task<ApiResult<{x.ResponseType.Name}>> " +
-                                           $"{GetMethodName(x)}({x.RequestType.Name} request)\n    {{\n    " +
-                                           $"    return this.RpcExecute<{x.RequestType.Name}, {x.ResponseType.Name}>(request);\n    }}");
+        var methods = metadata.Select(x => $"    public virtual Task<ApiResult<{x.DeclaringType.Name}.{x.ResponseType.Name}>> " +
+                                           $"{GetMethodName(x)}({x.DeclaringType.Name}.{x.RequestType.Name} request)\n    {{\n    " +
+                                           $"    return this.RpcExecute<{x.DeclaringType.Name}.{x.RequestType.Name}, {x.DeclaringType.Name}.{x.ResponseType.Name}>(request);\n    }}");
 
         return @$"namespace PowerLevel.Server.Tests;
 

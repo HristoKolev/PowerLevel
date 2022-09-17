@@ -2,35 +2,7 @@
 drop schema if exists "public" cascade;
 create schema "public";
 
-create table public.quizzes (
-	quiz_id serial,
-	
-	quiz_name text not null,
-	
-	primary key (quiz_id)
-);
-
-create table public.quiz_questions (
-	question_id serial,
-	
-	question_name text not null,
-	question_content text not null,
-	
-	quiz_id int not null references quizzes,
-
-	primary key (question_id)
-);
-
-create table public.quiz_answers (
-    answer_id serial,
-
-    answer_content text not null,
-    answer_is_correct boolean not null,
-    
-    question_id int not null references quiz_questions,
-
-    primary key (answer_id)
-);
+-- USER MANAGEMENT
 
 create table public.user_profiles (
     user_profile_id serial,
@@ -70,4 +42,40 @@ create table public.user_sessions (
     profile_id int not null references user_profiles,
 
     primary key (session_id)
+);
+
+-- QUIZ
+
+create table public.quizzes (
+	quiz_id serial,
+
+	quiz_name text not null,
+
+	user_profile_id int not null references public.user_profiles,
+
+	primary key (quiz_id)
+);
+
+create table public.quiz_questions (
+	question_id serial,
+
+    question_position int not null,
+	question_name text not null,
+	question_content text not null,
+
+	quiz_id int not null references quizzes,
+
+	primary key (question_id)
+);
+
+create table public.quiz_answers (
+    answer_id serial,
+
+    answer_position int not null,
+    answer_content text not null,
+    answer_is_correct boolean not null,
+
+    question_id int not null references quiz_questions,
+
+    primary key (answer_id)
 );

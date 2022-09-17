@@ -1,3 +1,4 @@
+namespace PowerLevel.Server;
 
 using System;
 using System.Collections.Generic;
@@ -5,16 +6,16 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using PowerLevel.Server.Auth;
+using Auth;
 using Autofac;
-using PowerLevel.Server.Infrastructure;
+using Infrastructure;
 using Microsoft.AspNetCore.Http;
+using OpenTelemetry.Trace;
 using Xdxd.DotNet.Http;
 using Xdxd.DotNet.Logging;
 using Xdxd.DotNet.Rpc;
 using Xdxd.DotNet.Shared;
 
-namespace PowerLevel.Server;
 public class HttpServerApp : IAsyncDisposable
 {
     public readonly string AppVersion = typeof(HttpServerApp).Assembly.GetName().Version?.ToString();
@@ -44,6 +45,8 @@ public class HttpServerApp : IAsyncDisposable
     public HttpServerAppConfig InjectedAppConfig { get; set; }
 
     public SessionCertificatePool SessionCertificatePool { get; set; }
+
+    public TracerProvider TracerProvider { get; set; }
 
     public StructuredLogger Log { get; set; }
 
@@ -92,6 +95,11 @@ public class HttpServerApp : IAsyncDisposable
         this.IoC = builder.Build();
 
         this.SessionCertificatePool = new SessionCertificatePool(this.AppConfig);
+
+        if (this.AppConfig.EnableDbTracing)
+        {
+            this.TracerProvider = DbFactory.CreateTracerProvider();
+        }
 
         this.Log = await CreateLogger(
             this.AppConfig.Logging,
@@ -235,6 +243,12 @@ public class HttpServerApp : IAsyncDisposable
             {
                 await this.Log.DisposeAsync();
                 this.Log = null;
+            }
+
+            if (this.TracerProvider != null)
+            {
+                this.TracerProvider.Dispose();
+                this.TracerProvider = null;
             }
 
             if (this.IoC != null)

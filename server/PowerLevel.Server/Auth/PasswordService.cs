@@ -21,6 +21,11 @@ public class PasswordServiceImpl : PasswordService
 
     public bool VerifyPassword(string password, string passwordHash)
     {
+        if (password == null || string.IsNullOrWhiteSpace(passwordHash))
+        {
+            return false;
+        }
+
         return BCrypt.EnhancedVerify(password, passwordHash, HASH_TYPE);
     }
 }

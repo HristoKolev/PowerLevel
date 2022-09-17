@@ -27,7 +27,7 @@ public class AuthHandlerRegisterReturnsErrorWhenTheUsernameIsTaken : HttpServerA
         var authService = this.App.IoC.Resolve<AuthService>();
         await authService.CreateProfile(TEST_EMAIL, TEST_PASSWORD);
 
-        var result = await this.RpcClient.Register(new RegisterRequest
+        var result = await this.RpcClient.Register(new AuthHandler.RegisterRequest
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
@@ -52,7 +52,7 @@ public class AuthHandlerRegisterReturnsSuccessWhenANewProfileIsCreated : HttpSer
     [Fact]
     public async Task RegisterReturnsSuccessWhenANewProfileIsCreated()
     {
-        var result = await this.RpcClient.Register(new RegisterRequest
+        var result = await this.RpcClient.Register(new AuthHandler.RegisterRequest
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
@@ -86,7 +86,7 @@ public class AuthHandlerLoginReturnsAnErrorOnWrongUsername : HttpServerAppTest
     [Fact]
     public async Task LoginReturnsAnErrorOnWrongUsername()
     {
-        var result = await this.RpcClient.Login(new LoginRequest
+        var result = await this.RpcClient.Login(new AuthHandler.LoginRequest
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
@@ -114,7 +114,7 @@ public class AuthHandlerLoginReturnsAnErrorOnWrongPassword : HttpServerAppTest
         var authService = this.App.IoC.Resolve<AuthService>();
         await authService.CreateProfile(TEST_EMAIL, TEST_PASSWORD);
 
-        var result = await this.RpcClient.Login(new LoginRequest
+        var result = await this.RpcClient.Login(new AuthHandler.LoginRequest
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD + "wrong",
@@ -144,7 +144,7 @@ public class AuthHandlerLoginReturnsAnErrorWhenTheLoginIsDisabled : HttpServerAp
         login.Enabled = false;
         await this.Db.Save(login);
 
-        var result = await this.RpcClient.Login(new LoginRequest
+        var result = await this.RpcClient.Login(new AuthHandler.LoginRequest
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
@@ -172,7 +172,7 @@ public class AuthHandlerLoginWorksInTheCorrectCase : HttpServerAppTest
         var authService = this.App.IoC.Resolve<AuthService>();
         await authService.CreateProfile(TEST_EMAIL, TEST_PASSWORD);
 
-        var result = await this.RpcClient.Login(new LoginRequest
+        var result = await this.RpcClient.Login(new AuthHandler.LoginRequest
         {
             EmailAddress = TEST_EMAIL,
             Password = TEST_PASSWORD,
@@ -199,7 +199,7 @@ public class AuthHandlerProfileInfoWorks : HttpServerAppTest
     {
         await this.CreateProfile();
 
-        var result = await this.RpcClient.ProfileInfo(new ProfileInfoRequest());
+        var result = await this.RpcClient.ProfileInfo(new ProfileHandler.ProfileInfoRequest());
 
         Snapshot.Match(result);
     }

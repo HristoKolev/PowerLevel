@@ -7,6 +7,13 @@ using Xdxd.DotNet.Rpc;
 [RpcAuth(RequiresAuthentication = false)]
 public class PingHandler
 {
+    public class PingRequest { }
+
+    public class PingResponse
+    {
+        public string Message { get; set; }
+    }
+
     [RpcBind(typeof(PingRequest), typeof(PingResponse))]
     public Task<PingResponse> Ping(PingRequest req)
     {
@@ -15,11 +22,4 @@ public class PingHandler
             Message = "Works.",
         });
     }
-}
-
-public class PingRequest { }
-
-public class PingResponse
-{
-    public string Message { get; set; }
 }

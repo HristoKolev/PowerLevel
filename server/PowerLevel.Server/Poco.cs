@@ -65,6 +65,19 @@ public class QuizAnswerPoco : IPoco<QuizAnswerPoco>
     public bool AnswerIsCorrect { get; set; }
 
     /// <summary>
+    /// <para>Column name: 'answer_position'.</para>
+    /// <para>Table name: 'quiz_answers'.</para>
+    /// <para>This column is not nullable.</para>
+    /// <para>PostgreSQL data type: 'integer'.</para>
+    /// <para>NpgsqlDbType: 'NpgsqlDbType.Integer'.</para>
+    /// <para>CLR type: 'int'.</para>
+    /// <para>linq2db data type: 'DataType.Int32'.</para>
+    /// </summary>
+    [LinqToDB.Mapping.NotNull]
+    [Column(Name = "answer_position", DataType = DataType.Int32)]
+    public int AnswerPosition { get; set; }
+
+    /// <summary>
     /// <para>Column name: 'question_id'.</para>
     /// <para>Table name: 'quiz_answers'.</para>
     /// <para>Foreign key column [public.quiz_answers.question_id -> public.quiz_questions.question_id].</para>
@@ -93,6 +106,11 @@ public class QuizAnswerPoco : IPoco<QuizAnswerPoco>
             {
                 TypedValue = this.AnswerIsCorrect,
                 NpgsqlDbType = NpgsqlDbType.Boolean,
+            },
+            new NpgsqlParameter<int>
+            {
+                TypedValue = this.AnswerPosition,
+                NpgsqlDbType = NpgsqlDbType.Integer,
             },
             new NpgsqlParameter<int>
             {
@@ -129,6 +147,8 @@ public class QuizAnswerPoco : IPoco<QuizAnswerPoco>
         }
 
         await importer.WriteAsync(this.AnswerIsCorrect, NpgsqlDbType.Boolean);
+
+        await importer.WriteAsync(this.AnswerPosition, NpgsqlDbType.Integer);
 
         await importer.WriteAsync(this.QuestionID, NpgsqlDbType.Integer);
     }
@@ -187,6 +207,19 @@ public class QuizQuestionPoco : IPoco<QuizQuestionPoco>
     public string QuestionName { get; set; }
 
     /// <summary>
+    /// <para>Column name: 'question_position'.</para>
+    /// <para>Table name: 'quiz_questions'.</para>
+    /// <para>This column is not nullable.</para>
+    /// <para>PostgreSQL data type: 'integer'.</para>
+    /// <para>NpgsqlDbType: 'NpgsqlDbType.Integer'.</para>
+    /// <para>CLR type: 'int'.</para>
+    /// <para>linq2db data type: 'DataType.Int32'.</para>
+    /// </summary>
+    [LinqToDB.Mapping.NotNull]
+    [Column(Name = "question_position", DataType = DataType.Int32)]
+    public int QuestionPosition { get; set; }
+
+    /// <summary>
     /// <para>Column name: 'quiz_id'.</para>
     /// <para>Table name: 'quiz_questions'.</para>
     /// <para>Foreign key column [public.quiz_questions.quiz_id -> public.quizzes.quiz_id].</para>
@@ -215,6 +248,11 @@ public class QuizQuestionPoco : IPoco<QuizQuestionPoco>
             {
                 TypedValue = this.QuestionName,
                 NpgsqlDbType = NpgsqlDbType.Text,
+            },
+            new NpgsqlParameter<int>
+            {
+                TypedValue = this.QuestionPosition,
+                NpgsqlDbType = NpgsqlDbType.Integer,
             },
             new NpgsqlParameter<int>
             {
@@ -259,6 +297,8 @@ public class QuizQuestionPoco : IPoco<QuizQuestionPoco>
             await importer.WriteAsync(this.QuestionName, NpgsqlDbType.Text);
         }
 
+        await importer.WriteAsync(this.QuestionPosition, NpgsqlDbType.Integer);
+
         await importer.WriteAsync(this.QuizID, NpgsqlDbType.Integer);
     }
 
@@ -302,6 +342,21 @@ public class QuizPoco : IPoco<QuizPoco>
     [Column(Name = "quiz_name", DataType = DataType.Text)]
     public string QuizName { get; set; }
 
+    /// <summary>
+    /// <para>Column name: 'user_profile_id'.</para>
+    /// <para>Table name: 'quizzes'.</para>
+    /// <para>Foreign key column [public.quizzes.user_profile_id -> public.user_profiles.user_profile_id].</para>
+    /// <para>Foreign key constraint name: 'quizzes_user_profile_id_fkey'.</para>
+    /// <para>This column is not nullable.</para>
+    /// <para>PostgreSQL data type: 'integer'.</para>
+    /// <para>NpgsqlDbType: 'NpgsqlDbType.Integer'.</para>
+    /// <para>CLR type: 'int'.</para>
+    /// <para>linq2db data type: 'DataType.Int32'.</para>
+    /// </summary>
+    [LinqToDB.Mapping.NotNull]
+    [Column(Name = "user_profile_id", DataType = DataType.Int32)]
+    public int UserProfileID { get; set; }
+
     public NpgsqlParameter[] GetNonPkParameters()
     {
         // ReSharper disable once RedundantExplicitArrayCreation
@@ -311,6 +366,11 @@ public class QuizPoco : IPoco<QuizPoco>
             {
                 TypedValue = this.QuizName,
                 NpgsqlDbType = NpgsqlDbType.Text,
+            },
+            new NpgsqlParameter<int>
+            {
+                TypedValue = this.UserProfileID,
+                NpgsqlDbType = NpgsqlDbType.Integer,
             },
         };
     }
@@ -340,6 +400,8 @@ public class QuizPoco : IPoco<QuizPoco>
         {
             await importer.WriteAsync(this.QuizName, NpgsqlDbType.Text);
         }
+
+        await importer.WriteAsync(this.UserProfileID, NpgsqlDbType.Integer);
     }
 
     public static TableMetadataModel Metadata => DbMetadata.QuizPocoMetadata;
@@ -1028,6 +1090,42 @@ public class DbMetadata
                 {
                     ColumnComment = "" == string.Empty ? null : "",
                     Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
+                    ColumnName = "answer_position",
+                    DbDataType = "integer",
+                    IsNullable = bool.Parse("False"),
+                    IsPrimaryKey = bool.Parse("False"),
+                    PrimaryKeyConstraintName = "" == string.Empty ? null : "",
+                    IsForeignKey = bool.Parse("False"),
+                    ForeignKeyConstraintName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceColumnName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceSchemaName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceTableName = "" == string.Empty ? null : "",
+                    PropertyName = "AnswerPosition",
+                    TableName = "quiz_answers",
+                    TableSchema = "public",
+                    PropertyType = new SimpleType
+                    {
+                        ClrTypeName = "int",
+                        ClrType = typeof(int),
+                        ClrNonNullableTypeName = "int",
+                        ClrNonNullableType = typeof(int),
+                        ClrNullableTypeName = "int?",
+                        ClrNullableType = typeof(int?),
+                        DbDataType = "integer",
+                        IsNullable = bool.Parse("False"),
+                        IsClrValueType = bool.Parse("True"),
+                        IsClrNullableType = bool.Parse("False"),
+                        IsClrReferenceType = bool.Parse("False"),
+                        Linq2DbDataTypeName = "DataType.Int32",
+                        Linq2DbDataType = DataType.Int32,
+                        NpgsqlDbTypeName = "NpgsqlDbType.Integer",
+                        NpgsqlDbType = NpgsqlDbType.Integer,
+                    },
+                },
+                new ColumnMetadataModel
+                {
+                    ColumnComment = "" == string.Empty ? null : "",
+                    Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
                     ColumnName = "question_id",
                     DbDataType = "integer",
                     IsNullable = bool.Parse("False"),
@@ -1065,6 +1163,7 @@ public class DbMetadata
             {
                 "answer_content",
                 "answer_is_correct",
+                "answer_position",
                 "question_id",
             },
         };
@@ -1191,6 +1290,42 @@ public class DbMetadata
                 {
                     ColumnComment = "" == string.Empty ? null : "",
                     Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
+                    ColumnName = "question_position",
+                    DbDataType = "integer",
+                    IsNullable = bool.Parse("False"),
+                    IsPrimaryKey = bool.Parse("False"),
+                    PrimaryKeyConstraintName = "" == string.Empty ? null : "",
+                    IsForeignKey = bool.Parse("False"),
+                    ForeignKeyConstraintName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceColumnName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceSchemaName = "" == string.Empty ? null : "",
+                    ForeignKeyReferenceTableName = "" == string.Empty ? null : "",
+                    PropertyName = "QuestionPosition",
+                    TableName = "quiz_questions",
+                    TableSchema = "public",
+                    PropertyType = new SimpleType
+                    {
+                        ClrTypeName = "int",
+                        ClrType = typeof(int),
+                        ClrNonNullableTypeName = "int",
+                        ClrNonNullableType = typeof(int),
+                        ClrNullableTypeName = "int?",
+                        ClrNullableType = typeof(int?),
+                        DbDataType = "integer",
+                        IsNullable = bool.Parse("False"),
+                        IsClrValueType = bool.Parse("True"),
+                        IsClrNullableType = bool.Parse("False"),
+                        IsClrReferenceType = bool.Parse("False"),
+                        Linq2DbDataTypeName = "DataType.Int32",
+                        Linq2DbDataType = DataType.Int32,
+                        NpgsqlDbTypeName = "NpgsqlDbType.Integer",
+                        NpgsqlDbType = NpgsqlDbType.Integer,
+                    },
+                },
+                new ColumnMetadataModel
+                {
+                    ColumnComment = "" == string.Empty ? null : "",
+                    Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
                     ColumnName = "quiz_id",
                     DbDataType = "integer",
                     IsNullable = bool.Parse("False"),
@@ -1228,6 +1363,7 @@ public class DbMetadata
             {
                 "question_content",
                 "question_name",
+                "question_position",
                 "quiz_id",
             },
         };
@@ -1314,10 +1450,47 @@ public class DbMetadata
                         NpgsqlDbType = NpgsqlDbType.Text,
                     },
                 },
+                new ColumnMetadataModel
+                {
+                    ColumnComment = "" == string.Empty ? null : "",
+                    Comments = "".Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries),
+                    ColumnName = "user_profile_id",
+                    DbDataType = "integer",
+                    IsNullable = bool.Parse("False"),
+                    IsPrimaryKey = bool.Parse("False"),
+                    PrimaryKeyConstraintName = "" == string.Empty ? null : "",
+                    IsForeignKey = bool.Parse("True"),
+                    ForeignKeyConstraintName = "quizzes_user_profile_id_fkey" == string.Empty ? null : "quizzes_user_profile_id_fkey",
+                    ForeignKeyReferenceColumnName = "user_profile_id" == string.Empty ? null : "user_profile_id",
+                    ForeignKeyReferenceSchemaName = "public" == string.Empty ? null : "public",
+                    ForeignKeyReferenceTableName = "user_profiles" == string.Empty ? null : "user_profiles",
+                    PropertyName = "UserProfileID",
+                    TableName = "quizzes",
+                    TableSchema = "public",
+                    PropertyType = new SimpleType
+                    {
+                        ClrTypeName = "int",
+                        ClrType = typeof(int),
+                        ClrNonNullableTypeName = "int",
+                        ClrNonNullableType = typeof(int),
+                        ClrNullableTypeName = "int?",
+                        ClrNullableType = typeof(int?),
+                        DbDataType = "integer",
+                        IsNullable = bool.Parse("False"),
+                        IsClrValueType = bool.Parse("True"),
+                        IsClrNullableType = bool.Parse("False"),
+                        IsClrReferenceType = bool.Parse("False"),
+                        Linq2DbDataTypeName = "DataType.Int32",
+                        Linq2DbDataType = DataType.Int32,
+                        NpgsqlDbTypeName = "NpgsqlDbType.Integer",
+                        NpgsqlDbType = NpgsqlDbType.Integer,
+                    },
+                },
             },
             NonPkColumnNames = new[]
             {
                 "quiz_name",
+                "user_profile_id",
             },
         };
 

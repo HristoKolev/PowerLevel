@@ -17,6 +17,10 @@ public class HttpServerAppConfig
     /// </summary>
     public string SessionCertificate { get; set; }
 
+    public bool EnableRecaptchaValidation { get; set; }
+
+    public bool EnableDbTracing { get; set; }
+
     public string RecaptchaSecret { get; set; }
 
     public HttpServerAppLoggingConfig Logging { get; set; }

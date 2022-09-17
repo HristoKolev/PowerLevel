@@ -1,10 +1,25 @@
 namespace PowerLevel.Server.Infrastructure;
 
 using Npgsql;
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Xdxd.DotNet.Postgres;
 
 public static class DbFactory
 {
+    public static TracerProvider CreateTracerProvider()
+    {
+        var tracerProvider = Sdk.CreateTracerProviderBuilder()
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("powerlevel"))
+            .SetSampler(new AlwaysOnSampler())
+            .AddNpgsql()
+            .AddConsoleExporter()
+            .Build();
+
+        return tracerProvider;
+    }
+
     /// <summary>
     /// Creates a new `NpgsqlConnection` connection.
     /// </summary>
