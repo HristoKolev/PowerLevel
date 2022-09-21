@@ -10,12 +10,15 @@ import { LoginResponse } from '~infra/RpcClient';
 import { createRpcClient } from '~infra/create-rpc-client';
 import { ReduxState } from '~infra/redux';
 
-const logout = createAsyncThunk(`SESSION/logout`, (_, { getState }) => {
-  const rpcClient = createRpcClient(getState());
+const logout = createAsyncThunk(
+  `SESSION/logout`,
+  (_, { getState, dispatch }) => {
+    const rpcClient = createRpcClient(getState(), dispatch);
 
-  // Ignore failed state
-  void rpcClient.logoutResult();
-});
+    // Ignore failed state
+    void rpcClient.logoutResult();
+  }
+);
 
 interface SessionState {
   loggedIn: boolean;
@@ -35,6 +38,10 @@ export const sessionSlice = createSlice({
       state.loggedIn = true;
       state.userInfo = payload;
     },
+    silentLogout(state) {
+      state.loggedIn = false;
+      state.userInfo = {} as LoginResponse;
+    },
   },
   extraReducers: {
     [logout.fulfilled.toString()]: (state) => {
@@ -50,6 +57,11 @@ const sessionStateSelector: Selector<ReduxState, SessionState> = (state) =>
 export const isLoggedInSelector = createSelector(
   sessionStateSelector,
   (x) => x.loggedIn
+);
+
+export const csrfTokenSelector = createSelector(
+  sessionStateSelector,
+  (x) => x.userInfo.csrfToken
 );
 
 export const sessionActions = sessionSlice.actions;

@@ -58,7 +58,7 @@ export const SignInPage = memo((): JSX.Element => {
       setSubmitLoading(true);
       setServerResult(undefined);
 
-      const rpcClient = createRpcClient();
+      const rpcClient = createRpcClient(undefined, dispatch);
 
       const result = await rpcClient.loginResult(formValues);
 

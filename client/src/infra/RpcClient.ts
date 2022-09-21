@@ -91,12 +91,14 @@ export interface QuizPoco {
 export interface DefaultApiError {
   errorMessages: string[];
   errorID?: string;
+  sessionRejected?: boolean;
 }
 
 export interface LoginError {
   userNotVerified?: boolean;
   errorMessages: string[];
   errorID?: string;
+  sessionRejected?: boolean;
 }
 
 export class RpcClient {

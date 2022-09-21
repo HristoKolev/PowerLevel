@@ -1,10 +1,15 @@
 // TODO: Find a better way to create an rpc client
 
+import { sessionActions } from '~auth/sessionSlice';
+
 import { RpcClient } from './RpcClient';
-import { ReduxState } from './redux';
+import { ReduxState, DispatchType } from './redux';
 import { BaseRpcClient } from './BaseRpcClient';
 
-export const createRpcClient = (rootStateOrToken?: unknown): RpcClient => {
+export const createRpcClient = (
+  rootStateOrToken?: unknown,
+  dispatch?: unknown
+): RpcClient => {
   let csrfToken;
 
   if (rootStateOrToken) {
@@ -20,6 +25,13 @@ export const createRpcClient = (rootStateOrToken?: unknown): RpcClient => {
   }
 
   const baseRpcClient = new BaseRpcClient();
+
+  if (dispatch) {
+    const dispatchFn = dispatch as DispatchType;
+    baseRpcClient.onSessionRejected(() => {
+      dispatchFn(sessionActions.silentLogout());
+    });
+  }
 
   if (csrfToken) {
     baseRpcClient.setCSRFToken(csrfToken);

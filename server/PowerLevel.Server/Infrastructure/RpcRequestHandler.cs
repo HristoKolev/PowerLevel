@@ -137,8 +137,6 @@ public class RpcInputValidationMiddleware : RpcMiddleware
 
 public class RpcAuthorizationMiddleware : RpcMiddleware
 {
-    public const string UNAUTHORIZED_ACCESS_MESSAGE = "Unauthorized access.";
-
     private static readonly RpcAuthAttribute DefaultAuthAttribute = new()
     {
         RequiresAuthentication = true,
@@ -151,6 +149,21 @@ public class RpcAuthorizationMiddleware : RpcMiddleware
         this.httpRequestState = httpRequestState;
     }
 
+    private static ApiResult<object, DefaultApiError> CreateUnauthorizedAccessError()
+    {
+        const string UNAUTHORIZED_ACCESS_MESSAGE = "Unauthorized access.";
+
+        return new ApiResult<object, DefaultApiError>(false, null,
+            new DefaultApiError
+            {
+                SessionRejected = true,
+                ErrorMessages = new[]
+                {
+                    UNAUTHORIZED_ACCESS_MESSAGE,
+                },
+            });
+    }
+
     public async Task Run(RpcContext context, InstanceProvider instanceProvider, RpcRequestDelegate next)
     {
         var authAttribute = context.GetSupplementalAttribute<RpcAuthAttribute>() ?? DefaultAuthAttribute;
@@ -161,7 +174,7 @@ public class RpcAuthorizationMiddleware : RpcMiddleware
 
         if (authAttribute.RequiresAuthentication && !isAuthenticated)
         {
-            context.SetResponse(ApiResult.Fail(UNAUTHORIZED_ACCESS_MESSAGE).ToGeneralForm());
+            context.SetResponse(CreateUnauthorizedAccessError().ToGeneralForm());
             return;
         }
 

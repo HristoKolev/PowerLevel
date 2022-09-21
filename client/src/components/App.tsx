@@ -1,30 +1,13 @@
-import { memo, StrictMode, Fragment } from 'react';
-import { CssBaseline, Button, Alert, AlertTitle } from '@mui/material';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { memo, StrictMode } from 'react';
+import { CssBaseline } from '@mui/material';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 
 import { useAppSelector, ReduxStoreType } from '~infra/redux';
 import { SignInPage } from '~auth/SignInPage';
 import { isLoggedInSelector } from '~auth/sessionSlice';
 import { Layout } from '~layout/Layout';
-
-const HomePage = memo(
-  (): JSX.Element => (
-    <div>
-      {Array(5)
-        .fill(undefined)
-        .map((_, i) => (
-          <Fragment key={i}>
-            <Button variant="contained">Contained</Button>
-            <Alert severity="error">
-              <AlertTitle>Error</AlertTitle>
-              This is an error alert — <strong>check it out!</strong>
-            </Alert>
-          </Fragment>
-        ))}
-    </div>
-  )
-);
+import { QuizList } from '~quizzes/QuizList';
 
 export const NotFoundPage = memo((): JSX.Element => <div>Not found</div>);
 
@@ -33,12 +16,18 @@ const RoutesWrapper = memo(() => {
 
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      {isLoggedIn && (
+        <>
+          <Route path="/" element={<Navigate to="/quizzes" replace />} />
+          <Route path="/quizzes" element={<QuizList />} />
+          <Route path="*" element={<Navigate to="/quizzes" replace />} />
+        </>
+      )}
 
       {!isLoggedIn && (
-        <Fragment>
+        <>
           <Route path="sign-in" element={<SignInPage />} />
-        </Fragment>
+        </>
       )}
 
       <Route path="*" element={<NotFoundPage />} />

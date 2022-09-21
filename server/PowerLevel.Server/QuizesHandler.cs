@@ -53,7 +53,7 @@ public class QuizHandler
     {
         return new GetQuizResponse
         {
-            Item = await this.quizService.GetById(req.Id, authResult.ProfileID),
+            Item = await this.quizService.Get(req.Id, authResult.ProfileID),
         };
     }
 
@@ -69,7 +69,7 @@ public class QuizHandler
     {
         await using (var tx = await this.db.BeginTransaction())
         {
-            bool deleted = await this.quizService.DeleteById(req.Id, authResult.ProfileID);
+            bool deleted = await this.quizService.Delete(req.Id, authResult.ProfileID);
 
             await tx.CommitAsync();
 
@@ -98,18 +98,18 @@ public class QuizHandler
 
             if (req.Item.IsNew())
             {
-                await this.quizService.Save(req.Item);
+                await this.quizService.Insert(req.Item);
             }
             else
             {
-                var oldQuiz = await this.quizService.GetById(req.Item.QuizID, authResult.ProfileID);
+                var oldQuiz = await this.quizService.Get(req.Item.QuizID, authResult.ProfileID);
 
                 if (oldQuiz == null)
                 {
                     return "No quiz found for quizId=" + req.Item.QuizID;
                 }
 
-                await this.quizService.Save(req.Item, oldQuiz);
+                await this.quizService.Update(oldQuiz, req.Item);
             }
 
             await tx.CommitAsync();
@@ -123,11 +123,13 @@ public interface QuizService
 {
     Task<QuizPoco[]> Search(string query, int userProfileId);
 
-    Task<QuizModel> GetById(int quizId, int userProfileId);
+    Task<QuizModel> Get(int quizId, int userProfileId);
 
-    Task<bool> DeleteById(int quizId, int userProfileId);
+    Task<bool> Delete(int quizId, int userProfileId);
 
-    Task Save(QuizModel newQuiz, QuizModel oldQuiz = null);
+    Task Insert(QuizModel newQuiz);
+
+    Task Update(QuizModel oldQuiz, QuizModel newQuiz);
 }
 
 public class QuizServiceImpl : QuizService
@@ -153,7 +155,7 @@ public class QuizServiceImpl : QuizService
         return this.db.Poco.Quizzes.Where(pb).ToArrayAsync();
     }
 
-    public async Task<QuizModel> GetById(int quizId, int userProfileId)
+    public async Task<QuizModel> Get(int quizId, int userProfileId)
     {
         var dataset = await (
             from q in this.db.Poco.Quizzes
@@ -219,7 +221,7 @@ public class QuizServiceImpl : QuizService
         return quizModel;
     }
 
-    public async Task<bool> DeleteById(int quizId, int userProfileId)
+    public async Task<bool> Delete(int quizId, int userProfileId)
     {
         await (
             from qa in this.db.Poco.QuizAnswers
@@ -245,85 +247,83 @@ public class QuizServiceImpl : QuizService
         return deletedRecords > 0;
     }
 
-    public async Task Save(QuizModel newQuiz, QuizModel oldQuiz = null)
+    public async Task Insert(QuizModel newQuiz)
     {
-        if (oldQuiz == null)
+        await this.db.Insert((QuizPoco)newQuiz);
+
+        foreach (var question in newQuiz.Questions)
         {
-            await this.db.Insert((QuizPoco)newQuiz);
+            question.QuestionID = 0;
+            question.QuizID = newQuiz.QuizID;
+            await this.db.Insert((QuizQuestionPoco)question);
 
-            foreach (var question in newQuiz.Questions)
+            foreach (var answer in question.Answers)
             {
-                question.QuestionID = 0;
-                question.QuizID = newQuiz.QuizID;
-                await this.db.Insert((QuizQuestionPoco)question);
-
-                foreach (var answer in question.Answers)
-                {
-                    answer.AnswerID = 0;
-                    answer.QuestionID = question.QuestionID;
-                    await this.db.Insert(answer);
-                }
+                answer.AnswerID = 0;
+                answer.QuestionID = question.QuestionID;
+                await this.db.Insert(answer);
             }
         }
-        else
+    }
+
+    public async Task Update(QuizModel oldQuiz, QuizModel newQuiz)
+    {
+        await this.db.Update((QuizPoco)newQuiz);
+
+        // Remove old records
+        var removeQuestions = oldQuiz.Questions.ExceptBy(newQuiz.Questions, x => x, QuestionIdentityComparer.Instance);
+        int[] removeQuestionIds = removeQuestions.Select(x => x.QuestionID).ToArray();
+        await this.db.Poco.QuizAnswers.DeleteAsync(x => removeQuestionIds.Contains(x.QuestionID));
+        await this.db.Poco.QuizQuestions.DeleteAsync(x => removeQuestionIds.Contains(x.QuestionID));
+
+        // Add new records
+        var addQuestions = newQuiz.Questions.ExceptBy(oldQuiz.Questions, x => x, QuestionIdentityComparer.Instance);
+        foreach (var question in addQuestions)
         {
-            await this.db.Update((QuizPoco)newQuiz);
+            question.QuestionID = 0;
+            question.QuizID = newQuiz.QuizID;
+            await this.db.Insert((QuizQuestionPoco)question);
+
+            foreach (var answer in question.Answers)
+            {
+                answer.AnswerID = 0;
+                answer.QuestionID = question.QuestionID;
+                await this.db.Insert(answer);
+            }
+        }
+
+        // Update existing records
+        var newUpdateQuestions = newQuiz.Questions.IntersectBy(oldQuiz.Questions, x => x, QuestionIdentityComparer.Instance);
+        var oldUpdateQuestionsById = oldQuiz.Questions.IntersectBy(newQuiz.Questions, x => x, QuestionIdentityComparer.Instance)
+            .ToDictionary(x => x.QuestionID);
+
+        foreach (var newQuestion in newUpdateQuestions)
+        {
+            newQuestion.QuizID = newQuiz.QuizID;
+            await this.db.Update((QuizQuestionPoco)newQuestion);
+
+            var oldQuestion = oldUpdateQuestionsById[newQuestion.QuestionID];
 
             // Remove old records
-            var removeQuestions = oldQuiz.Questions.ExceptBy(newQuiz.Questions, x => x, QuestionIdentityComparer.Instance);
-            int[] removeQuestionIds = removeQuestions.Select(x => x.QuestionID).ToArray();
-            await this.db.Poco.QuizAnswers.DeleteAsync(x => removeQuestionIds.Contains(x.QuestionID));
-            await this.db.Poco.QuizQuestions.DeleteAsync(x => removeQuestionIds.Contains(x.QuestionID));
+            var removeAnswers = oldQuestion.Answers.ExceptBy(newQuestion.Answers, x => x, AnswerIdentityComparer.Instance);
+            int[] removeAnswersIds = removeAnswers.Select(x => x.AnswerID).ToArray();
+            await this.db.Poco.QuizAnswers.DeleteAsync(x => removeAnswersIds.Contains(x.AnswerID));
 
             // Add new records
-            var addQuestions = newQuiz.Questions.ExceptBy(oldQuiz.Questions, x => x, QuestionIdentityComparer.Instance);
-            foreach (var question in addQuestions)
+            var addAnswers = newQuestion.Answers.ExceptBy(oldQuestion.Answers, x => x, AnswerIdentityComparer.Instance);
+            foreach (var answer in addAnswers)
             {
-                question.QuestionID = 0;
-                question.QuizID = newQuiz.QuizID;
-                await this.db.Insert((QuizQuestionPoco)question);
-
-                foreach (var answer in question.Answers)
-                {
-                    answer.AnswerID = 0;
-                    answer.QuestionID = question.QuestionID;
-                    await this.db.Insert(answer);
-                }
+                answer.AnswerID = 0;
+                answer.QuestionID = newQuestion.QuestionID;
+                await this.db.Insert(answer);
             }
 
             // Update existing records
-            var newUpdateQuestions = newQuiz.Questions.IntersectBy(oldQuiz.Questions, x => x, QuestionIdentityComparer.Instance);
-            var oldUpdateQuestionsById = oldQuiz.Questions.IntersectBy(newQuiz.Questions, x => x, QuestionIdentityComparer.Instance)
-                .ToDictionary(x => x.QuestionID);
-
-            foreach (var newQuestion in newUpdateQuestions)
+            var updateAnswers = newQuestion.Answers.IntersectBy(oldQuestion.Answers, x => x, AnswerIdentityComparer.Instance);
+            foreach (var answer in updateAnswers)
             {
-                newQuestion.QuizID = newQuiz.QuizID;
-                await this.db.Update((QuizQuestionPoco)newQuestion);
-
-                var oldQuestion = oldUpdateQuestionsById[newQuestion.QuestionID];
-
-                // Remove old records
-                var removeAnswers = oldQuestion.Answers.ExceptBy(newQuestion.Answers, x => x, AnswerIdentityComparer.Instance);
-                int[] removeAnswersIds = removeAnswers.Select(x => x.AnswerID).ToArray();
-                await this.db.Poco.QuizAnswers.DeleteAsync(x => removeAnswersIds.Contains(x.AnswerID));
-
-                // Add new records
-                var addAnswers = newQuestion.Answers.ExceptBy(oldQuestion.Answers, x => x, AnswerIdentityComparer.Instance);
-                foreach (var answer in addAnswers)
-                {
-                    answer.AnswerID = 0;
-                    answer.QuestionID = newQuestion.QuestionID;
-                    await this.db.Insert(answer);
-                }
-
-                // Update existing records
-                var updateAnswers = newQuestion.Answers.IntersectBy(oldQuestion.Answers, x => x, AnswerIdentityComparer.Instance);
-                foreach (var answer in updateAnswers)
-                {
-                    answer.QuestionID = newQuestion.QuestionID;
-                    await this.db.Update(answer);
-                }
+                answer.QuestionID = newQuestion.QuestionID;
+                await this.db.Update(answer);
             }
         }
     }

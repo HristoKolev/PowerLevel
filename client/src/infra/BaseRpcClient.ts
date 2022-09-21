@@ -1,3 +1,5 @@
+import { getQueryParam, delay } from '~infra/helpers';
+
 import { ApiResult } from './api-result';
 import { DefaultApiError } from './RpcClient';
 
@@ -45,8 +47,14 @@ const reportError = (message: string, error?: unknown): void => {
 export class BaseRpcClient {
   private csrfToken: string | undefined;
 
+  private onSessionRejectedCallback: (() => void) | undefined;
+
   setCSRFToken(csrfToken: string) {
     this.csrfToken = csrfToken;
+  }
+
+  onSessionRejected(fn: () => void) {
+    this.onSessionRejectedCallback = fn;
   }
 
   getCSRFToken() {
@@ -100,8 +108,6 @@ export class BaseRpcClient {
       return errorResult(errors.networkError);
     }
 
-    // TODO: Implement session rejection.
-
     // TODO: implement server versioning.
 
     if (response.status !== 200) {
@@ -122,6 +128,24 @@ export class BaseRpcClient {
     } catch (error) {
       reportError(errors.deserializeResponseError, error);
       return errorResult(errors.deserializeResponseError);
+    }
+
+    if (!responseBody.isOk && responseBody.error.sessionRejected) {
+      if (this.onSessionRejectedCallback) {
+        try {
+          this.onSessionRejectedCallback();
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error(e);
+        }
+      }
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      const rpcDelay = Number(getQueryParam('rpcDelay') || 0);
+      if (rpcDelay) {
+        await delay(rpcDelay);
+      }
     }
 
     return responseBody;

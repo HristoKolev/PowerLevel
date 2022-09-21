@@ -25,7 +25,7 @@ if (window.__browserSupported) {
 
   const reduxPersistManager = new ReduxPersistManager(
     localStorage,
-    'b1790b84-0f83-11ed-a424-6b51cdbb1fbe',
+    'redux-state-v1',
     [layoutSlice.name, sessionSlice.name]
   );
 

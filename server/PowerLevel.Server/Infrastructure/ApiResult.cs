@@ -14,6 +14,9 @@ public class DefaultApiError : ApiError
 
     [RpcNullable]
     public string ErrorID { get; set; }
+
+    [RpcNullable]
+    public bool SessionRejected { get; set; }
 }
 
 public class ApiResult
