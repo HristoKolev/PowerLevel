@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Alert } from '@mui/material';
+import { css } from '@linaria/core';
 
 import { ApiResult } from '~infra/api-result';
 
@@ -9,6 +10,11 @@ interface ServerResultErrorIndicatorProps {
   result: ApiResult<unknown> | undefined;
   testId?: string | undefined;
 }
+
+const wrapperClassName = css`
+  background-color: rgb(253, 237, 237);
+  border-radius: 4px;
+`;
 
 export const ServerResultErrorIndicator = memo(
   ({
@@ -20,13 +26,17 @@ export const ServerResultErrorIndicator = memo(
     }
 
     return (
-      <Alert severity="error">
-        {result.error.errorMessages.map((x) => (
-          <div data-testid={testId} key={x}>
-            {x}
-          </div>
-        ))}
-      </Alert>
+      <div
+        className={`${wrapperClassName} w-full h-full flex items-center justify-center`}
+      >
+        <Alert severity="error">
+          {result.error.errorMessages.map((x) => (
+            <div data-testid={testId} key={x}>
+              {x}
+            </div>
+          ))}
+        </Alert>
+      </div>
     );
   }
 );

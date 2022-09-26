@@ -17,10 +17,10 @@ const mainContentClassName = css`
     margin-left: var(--custom-drawer-width);
   }
 
-  margin-top: 56px;
+  margin-top: 42px;
 
   @media (min-width: 600px) {
-    margin-top: 64px;
+    margin-top: 50px;
   }
 `;
 

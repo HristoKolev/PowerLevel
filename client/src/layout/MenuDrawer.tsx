@@ -26,10 +26,10 @@ const customDrawerClassName = css`
   }
 
   .drawer-header {
-    min-height: 56px;
+    min-height: 42px;
 
     @media (min-width: 600px) {
-      min-height: 64px;
+      min-height: 50px;
     }
   }
 `;

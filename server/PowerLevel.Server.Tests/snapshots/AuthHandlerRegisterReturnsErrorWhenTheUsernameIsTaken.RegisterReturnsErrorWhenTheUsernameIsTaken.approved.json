@@ -3,7 +3,8 @@
     "ErrorID": null,
     "ErrorMessages": [
       "There already is an account with that email address."
-    ]
+    ],
+    "SessionRejected": false
   },
   "IsOk": false,
   "Payload": null

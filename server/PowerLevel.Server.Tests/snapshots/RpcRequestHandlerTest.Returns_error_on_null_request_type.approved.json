@@ -4,7 +4,8 @@
     "errorMessages": [
       "Request type is null or an empty string."
     ],
-    "errorID": null
+    "errorID": null,
+    "sessionRejected": false
   },
   "payload": null
 }

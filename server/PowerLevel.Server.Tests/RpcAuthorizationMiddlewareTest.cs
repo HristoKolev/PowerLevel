@@ -245,8 +245,9 @@ public class RpcAuthorizationMiddlewareTest
     private static void AssertUnauthorizedAccess(Result<object, object> result)
     {
         Assert.False(result.IsOk);
-        var error = Assert.IsAssignableFrom<ApiError>(result.Error);
+        var error = Assert.IsAssignableFrom<DefaultApiError>(result.Error);
         Assert.Equal(RpcAuthorizationMiddleware.UNAUTHORIZED_ACCESS_MESSAGE, error!.ErrorMessages.Single());
+        Assert.True(error.SessionRejected);
     }
 
     private static InstanceProvider GetInstanceProvider(HttpRequestState httpRequestState)

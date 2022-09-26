@@ -15,8 +15,12 @@ import { ServerResultErrorIndicator } from '~shared/ServerResultErrorIndicator';
 import { ServerResultLoadingIndicator } from '~shared/ServerResultLoadingIndicator';
 
 const quizListClassName = css`
-  .card {
-    width: 1000px;
+  .button-column {
+    width: 96px;
+  }
+
+  .id-column {
+    width: 50px;
   }
 `;
 
@@ -27,8 +31,8 @@ export const QuizList = (): JSX.Element => {
   );
 
   return (
-    <div className={`${quizListClassName} flex justify-around`}>
-      <Paper elevation={12} className="card flex flex-col gap-4 mt-4 p-4">
+    <div className={`${quizListClassName} flex-grow flex justify-around`}>
+      <Paper elevation={12} className="w-full flex flex-col gap-4 mt-4 p-4">
         <div className="title font-bold text-center" data-testid="card-title">
           Quizzes
         </div>
@@ -37,14 +41,14 @@ export const QuizList = (): JSX.Element => {
         <ServerResultErrorIndicator result={serverResult} />
         {serverResult?.isOk && (
           <TableContainer component={Paper}>
-            <Table>
+            <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>#</TableCell>
+                  <TableCell className="id-column">#</TableCell>
                   <TableCell>Name</TableCell>
-                  <TableCell>Edit</TableCell>
-                  <TableCell>Delete</TableCell>
-                  <TableCell>Play</TableCell>
+                  <TableCell className="button-column" />
+                  <TableCell className="button-column" />
+                  <TableCell className="button-column" />
                 </TableRow>
               </TableHead>
               <TableBody>

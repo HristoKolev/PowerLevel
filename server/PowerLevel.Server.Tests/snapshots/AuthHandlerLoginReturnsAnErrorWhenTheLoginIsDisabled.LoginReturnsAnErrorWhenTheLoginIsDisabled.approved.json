@@ -3,7 +3,8 @@
     "ErrorID": null,
     "ErrorMessages": [
       "Account disabled."
-    ]
+    ],
+    "SessionRejected": false
   },
   "IsOk": false,
   "Payload": null

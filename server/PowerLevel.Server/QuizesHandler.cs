@@ -1,5 +1,7 @@
 namespace PowerLevel.Server;
 
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,9 +34,13 @@ public class QuizHandler
     [RpcBind(typeof(SearchQuizzesRequest), typeof(SearchQuizzesResponse))]
     public async Task<SearchQuizzesResponse> SearchQuizzes(SearchQuizzesRequest req, AuthResult authResult)
     {
+        var items = await this.quizService.Search(req.Query, authResult.ProfileID);
+
+        Array.Sort(items, QuizModel.IdComparer);
+
         return new SearchQuizzesResponse
         {
-            Items = await this.quizService.Search(req.Query, authResult.ProfileID),
+            Items = items,
         };
     }
 
@@ -377,4 +383,31 @@ public class QuizQuestionModel : QuizQuestionPoco
 public class QuizModel : QuizPoco
 {
     public List<QuizQuestionModel> Questions { get; set; }
+
+    private static QuizModelComparer idComparerInstance;
+
+    public static QuizModelComparer IdComparer => idComparerInstance ??= new QuizModelComparer();
+
+    public class QuizModelComparer : IComparer<QuizModel>, IComparer
+    {
+        public int Compare(QuizModel x, QuizModel y)
+        {
+            if (x == null)
+            {
+                return 1;
+            }
+
+            if (y == null)
+            {
+                return -1;
+            }
+
+            return x!.QuizID.CompareTo(y!.QuizID);
+        }
+
+        public int Compare(object x, object y)
+        {
+            return this.Compare((QuizModel)x, (QuizModel)x);
+        }
+    }
 }

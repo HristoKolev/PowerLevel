@@ -137,6 +137,8 @@ public class RpcInputValidationMiddleware : RpcMiddleware
 
 public class RpcAuthorizationMiddleware : RpcMiddleware
 {
+    public const string UNAUTHORIZED_ACCESS_MESSAGE = "Unauthorized access.";
+
     private static readonly RpcAuthAttribute DefaultAuthAttribute = new()
     {
         RequiresAuthentication = true,
@@ -151,8 +153,6 @@ public class RpcAuthorizationMiddleware : RpcMiddleware
 
     private static ApiResult<object, DefaultApiError> CreateUnauthorizedAccessError()
     {
-        const string UNAUTHORIZED_ACCESS_MESSAGE = "Unauthorized access.";
-
         return new ApiResult<object, DefaultApiError>(false, null,
             new DefaultApiError
             {
