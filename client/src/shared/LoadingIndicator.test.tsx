@@ -4,12 +4,6 @@ import { renderWithProviders } from '~test-utils';
 
 import { LoadingIndicator } from './LoadingIndicator';
 
-afterEach(() => {
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
-  jest.resetModules();
-});
-
 test('shows ui immediately if the delay is 0', async () => {
   renderWithProviders(<LoadingIndicator delay={0} />);
 

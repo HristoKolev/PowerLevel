@@ -7,12 +7,6 @@ import { RpcClient } from '~infra/RpcClient';
 
 import { createRpcClient } from './create-rpc-client';
 
-afterEach(() => {
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
-  jest.resetModules();
-});
-
 const getCSRFToken = (rpcClient: RpcClient) => {
   const baseClient = Reflect.get(rpcClient, 'baseClient') as BaseRpcClient;
   expect(baseClient).toBeTruthy();

@@ -10,45 +10,11 @@ import { RpcClient } from '~infra/RpcClient';
 
 import { CustomAppBar } from './CustomAppBar';
 
+jest.mock('~infra/RpcClient');
 type RpcClientMockType = { [key in keyof RpcClient]: jest.Mock };
-
-jest.mock('~infra/RpcClient', () => {
-  const MockedRpcClient: RpcClientMockType = (() => {
-    const map = new Map<string, jest.Mock>();
-    const proxy: RpcClientMockType = new Proxy(
-      function () {} as unknown as RpcClientMockType,
-      {
-        construct() {
-          return proxy;
-        },
-        get(_, key: string): jest.Mock {
-          if (!map.has(key)) {
-            map.set(key, jest.fn());
-          }
-          return map.get(key) as jest.Mock;
-        },
-      }
-    );
-    return proxy;
-  })();
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return {
-    ...jest.requireActual('~infra/RpcClient'),
-    RpcClient: MockedRpcClient,
-  };
-});
-
 const RpcClientMock = RpcClient as unknown as RpcClientMockType;
 
-jest.mock('react-router-dom', () => {
-  const navigate = jest.fn();
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return {
-    ...jest.requireActual('react-router-dom'),
-    useNavigate: () => navigate,
-  };
-});
-
+jest.mock('react-router-dom');
 // eslint-disable-next-line react-hooks/rules-of-hooks
 const navigateMock = useNavigate() as jest.Mock;
 
@@ -63,12 +29,6 @@ const loginUser = (store: ReduxStoreType) => {
     );
   });
 };
-
-afterEach(() => {
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
-  jest.resetModules();
-});
 
 test('login buttons shows when user is not logged in', async () => {
   renderWithProviders(<CustomAppBar />);

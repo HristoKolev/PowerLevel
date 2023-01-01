@@ -15,9 +15,6 @@ afterAll(() => {
 
 afterEach(() => {
   ResizeObserverMock.clearInstances();
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
-  jest.resetModules();
 });
 
 test('renders without error', async () => {

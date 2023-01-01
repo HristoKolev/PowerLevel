@@ -52,12 +52,6 @@ const createTestStore = (preloadedState?: unknown) =>
 
 const STORAGE_KEY = 'STORAGE_KEY';
 
-afterEach(() => {
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
-  jest.resetModules();
-});
-
 test('readPersistedState returns an empty object when storage location is empty', async () => {
   const reduxPersistManager = new ReduxPersistManager(
     new InMemoryStorage(),

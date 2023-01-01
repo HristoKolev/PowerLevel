@@ -27,19 +27,19 @@ export class ResizeObserverMock {
 
     if (!ResizeObserverMock.originalResizeObserver) {
       ResizeObserverMock.originalResizeObserver = Reflect.get(
-        global,
+        window,
         'ResizeObserver'
       );
     }
 
-    Reflect.set(global, 'ResizeObserver', ResizeObserverMock);
+    Reflect.set(window, 'ResizeObserver', ResizeObserverMock);
   }
 
   static disableMock() {
     ResizeObserverMock.clearInstances();
 
     Reflect.set(
-      global,
+      window,
       'ResizeObserver',
       ResizeObserverMock.originalResizeObserver
     );

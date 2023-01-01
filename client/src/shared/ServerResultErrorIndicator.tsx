@@ -4,7 +4,7 @@ import { css } from '@linaria/core';
 
 import { ApiResult } from '~infra/api-result';
 
-// TODO: extract a separate ErrorIndicator component and bease this one on that.
+// TODO: extract a separate ErrorIndicator component and base this one on that.
 interface ServerResultErrorIndicatorProps {
   // TODO: allow multiple results.
   result: ApiResult<unknown> | undefined;

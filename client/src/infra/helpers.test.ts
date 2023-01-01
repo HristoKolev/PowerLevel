@@ -1,14 +1,11 @@
-import { delay } from './helpers';
+import { delay } from '~infra/helpers';
 
-jest.spyOn(global, 'setTimeout');
-
-afterEach(() => {
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
-  jest.resetModules();
-});
+jest.useFakeTimers();
 
 test('delay resolves after the timeout expires', async () => {
-  await delay(10);
-  expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 10);
+  const promise = delay(10);
+
+  jest.advanceTimersByTime(10);
+
+  await promise;
 });

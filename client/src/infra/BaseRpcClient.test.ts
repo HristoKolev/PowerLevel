@@ -1,25 +1,22 @@
 import { BaseRpcClient, RpcError } from './BaseRpcClient';
 import { ApiResult } from './api-result';
 
-const consoleErrorMock = jest.fn();
-Reflect.set(console, 'error', consoleErrorMock);
-
-const originalStringify = JSON.stringify;
-const stringifyMock = jest.fn(originalStringify);
-JSON.stringify = stringifyMock as typeof JSON.stringify;
-
-const originalParse = JSON.parse;
-const parseMock = jest.fn(originalParse);
-JSON.parse = parseMock as typeof JSON.parse;
+const errorMock = jest.fn();
+// eslint-disable-next-line no-console
+console.error = errorMock;
 
 const fetchMock = jest.fn();
 window.fetch = fetchMock;
 
-afterEach(() => {
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
-  jest.resetModules();
+const originalStringify = JSON.stringify;
+const stringifyMock = jest.fn();
+JSON.stringify = stringifyMock as typeof JSON.stringify;
 
+const originalParse = JSON.parse;
+const parseMock = jest.fn();
+JSON.parse = parseMock as typeof JSON.parse;
+
+beforeEach(() => {
   stringifyMock.mockImplementation(originalStringify);
   parseMock.mockImplementation(originalParse);
 });
@@ -37,7 +34,7 @@ test('sendResult returns error result on falsy requestType', async () => {
       "isOk": false,
     }
   `);
-  expect(consoleErrorMock).toHaveBeenCalled();
+  expect(errorMock).toHaveBeenCalled();
 });
 
 test('sendResult returns error result on serialization error', async () => {
@@ -59,7 +56,7 @@ test('sendResult returns error result on serialization error', async () => {
     }
   `);
 
-  expect(consoleErrorMock).toHaveBeenCalled();
+  expect(errorMock).toHaveBeenCalled();
 });
 
 test('sendResult returns error result on fetch error', async () => {
@@ -81,7 +78,7 @@ test('sendResult returns error result on fetch error', async () => {
     }
   `);
 
-  expect(consoleErrorMock).toHaveBeenCalled();
+  expect(errorMock).toHaveBeenCalled();
 });
 
 test('sendResult returns error result on non 200 status code', async () => {
@@ -126,7 +123,7 @@ test('sendResult returns error result on failure to read the response', async ()
     }
   `);
 
-  expect(consoleErrorMock).toHaveBeenCalled();
+  expect(errorMock).toHaveBeenCalled();
 });
 
 test('sendResult returns error result on failure to parse the response', async () => {
@@ -155,7 +152,7 @@ test('sendResult returns error result on failure to parse the response', async (
     }
   `);
 
-  expect(consoleErrorMock).toHaveBeenCalled();
+  expect(errorMock).toHaveBeenCalled();
 });
 
 test('window.fetch is called with the correct parameters', async () => {
@@ -200,7 +197,7 @@ test('sendResult returns response body on successful response', async () => {
 
   expect(result).toEqual(mockResult);
 
-  expect(consoleErrorMock).not.toHaveBeenCalled();
+  expect(errorMock).not.toHaveBeenCalled();
 });
 
 test('CSRF token is sent to the server', async () => {
